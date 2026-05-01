@@ -27,6 +27,8 @@ This is a first pass. Items marked _(open)_ are placeholders pending a decision 
 - F11a. A scenario declares its turn duration in in-fiction time (e.g. half-day, day, week, sprint, month). The runner is agnostic to the unit; capacity, ritual cadence, and deadlines are expressed in it. Turn duration is fixed at scenario start in v1.
 - F12. The user can pause indefinitely between turns. There is no wall-clock pressure.
 - F13. A run ends automatically when a defined goal is reached or any exit condition fires. The user can also end a run manually.
+- F-G1. Scenario `goals` may include **`require_done_ids`**: a list of work-item **ids** that must all be in the `done` state before the goal is considered met (outcome-based success).
+- F-G2. Scenario `goals` may include **`min_done_work_items`** (minimum count of done work items) and **`per_team_min_done`** (each non-empty team must have at least this many done items owned by a member). **Precedence:** when `require_done_ids` is non-empty, **`min_done_work_items` is not used** in goal evaluation (outcome ids are authoritative for the volume check). **`per_team_min_done` still applies** when set, after `require_done_ids` is satisfied. Stress caps (`max_stress_any`, etc.) apply regardless.
 
 ### Simulation fidelity
 
@@ -72,14 +74,14 @@ Naming convention: **vitals** = per character and per team; **metrics** = per or
 - F-VM4. Vitals and metrics update from three sources: (a) deterministic engine rules during `tick`; (b) agent self-reporting at end of turn, bounded to a small per-turn delta; (c) explicit events and coach actions.
 - F-VM5. The coach sees true values for all entities at any time.
 - F-VM6. Agents know their own vitals approximately and form opinions about other agents' vitals through interaction. Agent prompts include the agent's own vitals; they do not include others'.
-- F-VM7. Scenario `goal` and `exit_conditions` may reference vitals and metrics (e.g. "delivery progress = 100% AND avg motivation ≥ 50 AND tech debt ≤ 30"). Each criterion is rendered with **stoplight** status (🟢 on track / 🟡 at risk / 🔴 failing).
+- F-VM7. Scenario `goal` and `exit_conditions` may reference vitals and metrics (e.g. "delivery progress = 100% AND avg motivation ≥ 50 AND tech debt ≤ 30"). Each criterion is rendered with **stoplight** status (🟢 on track / 🟡 at risk / 🔴 failing). When the goal is expressed via **`require_done_ids`** (see F-G1), the stoplight and inspector UI should surface **those ids** (and labels from the ledger), not only aggregate counts — so the coach sees which outcome rows (e.g. O1, O2) are still open.
 - F-VM8. The runner UI shows current values with per-turn history (sparklines in the right rail, full **time-series graph** on inspection), and flags exit-condition thresholds.
 - F-VM9. Per-turn snapshots are recorded on the run timeline.
 
 ### Process engine
 
 - F-PE1. Every scenario includes a process engine definition, even if minimal (chaos = a near-empty rule set).
-- F-PE2. The engine holds: roles and decision rights, approval gates, scheduled rituals, work-item state machine, and arbitrary named rules. **v1:** agents and coach may emit `process_invocations` in structured output; `harness/engine.py` records allowed kinds on `timeline.jsonl` as `process_invocation` rows (execution of rules still shallow).
+- F-PE2. The engine holds: roles and decision rights, approval gates, scheduled rituals, work-item state machine, and arbitrary named rules. **v1 harness:** agents and coach may emit `process_invocations` in structured output; [`harness/engine.py`](../harness/engine.py) records **allowlisted** kinds on the run timeline as `process_invocation` rows; other kinds emit `process_invocation_unhandled`. Allowlist for v1: `consult`, `invoke`, `tick`, `request_approval`, `change_deadline`, `edit_ritual`, `set_gate`. Execution of rules (validate, queue, ledger mutation) remains shallow until process engine v1 deepens.
 - F-PE3. Any agent can issue a **consult** query against the engine ("what's the policy on X?", "do I need approval for Y?", "when is the next ritual?") and receive a deterministic, structured answer.
 - F-PE4. Any agent can issue an **invoke** request to take a process-mediated action: escalate a decision, request approval, introduce new work, move a person between teams, change a deadline, schedule/cancel a ritual. The engine validates against rules and either executes, queues, or rejects with a reason.
 - F-PE5. The engine emits scheduled events into the world (ritual due, approval pending, deadline approaching) which appear in the next turn's per-agent context.
@@ -105,7 +107,7 @@ This is the primary interaction surface. The simulation runs in order to give th
 ### Coaching best practices
 
 - F-BP1. A **coaching best-practices library** is part of the app: a list of named, categorized principles with short descriptions.
-- F-BP2. The library has a **global** layer (editable in global config, ships with sensible defaults) and a **scenario-additions** layer (scenarios may add or override entries).
+- F-BP2. The library has a **global** layer (editable in global config, ships with sensible defaults) and a **scenario-additions** layer (scenarios may add or override entries **by `id`**). Merge: start from global; scenario entry with matching `id` **replaces** the global row; scenario entries with new `id`s are **appended**.
 - F-BP3. The library is consumed by the Summary loop (see [`agentic-design.md`](agentic-design.md)) and is *not* used during simulation — agents are not constrained by it.
 - F-BP4. The Final Report assesses the coach's run against the merged library: which practices were applied well, partially applied, missed, or violated.
 - F-BP5. Editing the library and re-running the summary on a completed run produces a fresh report; the prior report is preserved as a snapshot.

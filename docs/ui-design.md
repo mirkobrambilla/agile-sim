@@ -131,7 +131,7 @@ What the drawer (or its expanded profile) shows for each kind of object:
 - **Work item** — title, owner avatar, state pill, estimate vs. actuals, dependencies and blocked-by chain, narrated mentions across turns, audit trail (state changes by turn).
 - **Channel** — type icon, name, members, lifecycle status, coach engagement mode, message count by turn (mini chart), pinned context (for event channels: the bound process event and outcome).
 - **Vital / metric** — label, current value, threshold markers from goals, **time-series chart** across all turns, breakdown of what changed it (rule fires, self-reports, coach nudges, narrator outcomes).
-- **Goal / exit condition** — stoplight status (🟢/🟡/🔴), each criterion with its target and current value, history of when each criterion changed status.
+- **Goal / exit condition** — stoplight status (🟢/🟡/🔴). Each criterion expands to its target and current value. When the scenario uses **outcome work items** (`require_done_ids`), list each id with title (from ledger), state (pending / doing / done), and its own stoplight — not only a single "N done" aggregate. The read-only web prototype may show summary goal state only until the runner UI catches up.
 - **Process rule** — definition, version history, things it currently gates, recent applications.
 - **External party** (customer / vendor / exec): same as character but with a distinct outline marking them as outside the org.
 
@@ -150,7 +150,7 @@ A small visual vocabulary applied consistently.
 | **Message** | Avatar + author + content + reactions row. Mentions as pills. Narrated event transcripts have a distinct border + "📣 transcript" badge. |
 | **Vital** | Horizontal bar with label, value, threshold markers; colour shifts when near a threshold. Sparkline below. Click to see full time-series. |
 | **Metric (org)** | A small gauge or bar with stoplight colour. Sparkline. Click for time-series + breakdown. |
-| **Goal / exit condition** | Pinned at the top of the right rail with **stoplight** status: 🟢 on track / 🟡 at risk / 🔴 failing. Each criterion expands to show its target and current value. |
+| **Goal / exit condition** | Pinned at the top of the right rail with **stoplight** status: 🟢 on track / 🟡 at risk / 🔴 failing. Each criterion expands to show its target and current value. For **outcome-based goals** (`require_done_ids`), show **each required work item id** (e.g. O1, O2) with title, column/state, and per-item stoplight — not only a rolled-up count. |
 | **Process rule** | A card in the rules list; tap to inspect. Versioning shown as a small revision count. |
 | **External party** | Same as character but with a distinct frame (e.g. dashed pixel border) so it reads as outside the org. |
 
@@ -247,7 +247,7 @@ A bold headline at the top:
 - ⚠️ "Partial: integration delivered, but tech debt exceeded threshold."
 - ❌ "Run ended: lead engineer quit (turn 14)."
 
-Stoplight chips for each goal/exit criterion with their final value.
+Stoplight chips for each goal/exit criterion with their final value. When criteria include **`require_done_ids`**, chips or a sub-list should name each outcome id and its final state (done / not).
 
 **2. Narrative summary**
 3–5 paragraphs of generated prose: the arc of the run, the turning points, what worked and what didn't. Written as a coaching report, not a play-by-play. The coach's actions are central to this narrative.

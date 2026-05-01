@@ -96,7 +96,7 @@ Every simulation has a set of **comms channels** — Slack/Teams-style spaces wh
 
 Channel types:
 
-- **DM** — 1:1, between any two participants (including the coach).
+- **DM** — 1:1 channel. Primary pattern: **`dm/<character_id>`** — coach paired with that character; membership is implicit (`simulation-model.md`). Broader "any two participants" DMs may be allowed later when the engine supports ad-hoc channel creation; the v1 harness centres on coach↔character threads.
 - **Group** — small, named, persistent (e.g. `team-alpha`).
 - **Open** — org-wide (e.g. `general`, `engineering`).
 - **Event** — bound to a process event with a lifecycle: opens when triggered, has membership defined by the event, closes/archives when done. Examples: an incident channel for a production outage, a quarterly planning channel that exists only during planning, a "meeting" channel for an important conversation. The process engine opens and closes event channels via its scheduler.
@@ -149,7 +149,15 @@ This connects directly to scenario design: **goals and exit conditions can be ex
 
 The end-of-turn interaction is the heart of the app. The simulation runs so the user has something concrete to react to; the value is in what they do between turns.
 
-The user is not a character inside the simulation by default. They are an outside coach. At the end of every turn they can:
+**Who acts as coach** in a given run can be:
+
+- The **human user** — between turns: inspect, post in channels, intervene, advance.
+- An **autonomous LLM coach** — one LLM call per coaching step, same channels and rules as the user.
+- A **scripted coach preset** — canned or rules-first behaviour for A/B experiments.
+
+All three use the **same** comms and process APIs: posts and process actions with `author = coach`. Per-channel `coach_engagement` applies the same way. The harness today wires an LLM coach by default for hands-free batch runs; a full UI loop would surface the human between turns the same way.
+
+The user is not a character inside the simulation by default. They are an outside coach when they are the one steering. At the end of every turn they can:
 
 - **Inspect** — see what happened, what each agent thinks, where things are stuck.
 - **Coach** — open a 1:1 chat with any agent (or group) to give advice, ask questions, challenge assumptions, set expectations, reframe a situation.
@@ -170,6 +178,8 @@ Two layers:
 
 - **Global library** — ships with the app, editable in global config. A curated set of cross-context principles ("address blockers within 2 turns of identification", "use private DM for course-correction before public callouts", "watch for unilateral commitments made under pressure", etc.).
 - **Scenario additions** — scenarios can extend or override the global library with practices specific to their context (an agile-delivery scenario might add "never skip retros"; a workshop scenario might add "rotate facilitators to spread psychological load").
+
+**Merge rule.** Entries are keyed by stable **`id`**. When building the merged library for analysis: start from the global list; for each entry in the scenario file, **replace** the global entry with the same `id`, or **append** if the `id` is new. Scenario-only entries always apply. There is no automatic field-level merge across global and scenario for the same `id` — the scenario definition wins the whole entry.
 
 Each entry is short, named, and has a category and description. The library is consulted by the summary/final-report generation only; it does not constrain how agents behave during the run. This separation matters: the simulation produces what it produces; the analysis judges it against principles a coach is trying to learn.
 
@@ -212,9 +222,8 @@ A web UI with two main modules:
 Genuinely undecided. (Several earlier questions have been resolved by the model converging — see commit history.)
 
 - **Agent reasoning model.** Single LLM call per agent per turn, or a richer loop (perceive → reflect → act, à la Park et al.)?
-- **Coachability.** Is influence a per-agent trait, or emergent from personality/skills? Should agents be allowed to ignore the coach? How is that modeled?
+- **Coachability (v1).** No separate numeric "coachability" trait in v1. How receptive an agent is to the coach is **emergent**: personality, goals, relationship to authority, and how the coach shows up (channel, tone, public vs private). Agents may ignore, partially take, or push back on coaching in their narrative and structured output; that behaviour is expressed through normal turn output, not a dedicated scalar. Revisit an explicit trait if experiments show we need finer control.
 - **Disagreement in narrated conversations.** When two participants' desired outcomes conflict (e.g. one wants a commitment, the other wants to defer), how does the narrator handle it? Default: render the disagreement honestly and let the structured outcome reflect "no agreement reached", with downstream effects on the ledger.
-- **Process engine v1 vocabulary.** Confirm the minimum rule set: roles, decision rights, approval gates, scheduled rituals, work-item state machine. What else, what's deferred?
 - **Memory growth.** How much per-agent memory is kept, and how is it summarized as runs get long? Likely: memory stream + periodic reflection (Park et al.).
 - **Mid-run turn-duration changes.** Allow the coach to switch cadence mid-run, or fix at scenario start in v1?
 - **Determinism / reproducibility.** Are runs reproducible from a seed, or inherently stochastic?

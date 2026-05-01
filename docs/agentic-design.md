@@ -92,6 +92,10 @@ The character's **expression** (idle / happy / frustrated / overloaded / bored /
 
 The orchestrator is the only thing that interprets this output: it routes posts to comms, invocations to the engine, vital deltas to the ledger (clamped), contributions to the narrator queue, and appends `narrative` and `internal_state_update` to the agent's memory stream.
 
+### Coachability (v1)
+
+There is no separate `coachability` field in the structured character profile for v1. Receptiveness to the coach is **emergent** from personality, goals, role, and situation. The model may show agreement, partial uptake, pushback, or stonewalling in `narrative`, `channel_posts`, and how it references coach-authored context — without a dedicated scalar the harness must tune. If future scenarios need predictable variance (e.g. "this character always resists authority"), we can add an explicit trait later.
+
 ### Why a single call (not iterative tool calling)
 
 Multi-step tool-calling loops (call → tool → call → tool → final) would let an agent ask "what's the policy on X?" mid-thought. That's seductive but adds latency, cost, and orchestration complexity. For our scale (potentially many agents per turn) and our preference for predictable cost, we instead **stuff a deterministic process digest into the prompt** and let the agent produce its full structured response in one shot. If the agent's response references something it doesn't have detail on, it can ask in narrative or post a question in a channel — the next turn will carry the answer.

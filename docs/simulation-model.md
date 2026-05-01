@@ -60,6 +60,12 @@ The coach gets concrete, specific detail (not generic narration) from three sour
 
 The coach can also DM any agent ("walk me through the standup", "why did you push back?") to dig further. The agent answers from memory.
 
+### DM channels (`dm/<character_id>`) as first-class comms
+
+**Direct messages** are a normal channel type with `type: dm`. The stable id is `dm/<character_id>` where `<character_id>` is the **participant character** (the non-coach side). Membership is implicit: the coach and that character only. Scenario YAML lists public/group/event channels (e.g. `#eng-pilot`); coach–person private threads are **not** repeated as duplicate `channels[]` rows — they are addressed by convention as `dm/<id>`.
+
+Delivery, engagement modes, and timeline logging treat DMs like other channels: async posts, turn-skewed read receipts in the harness, and per-channel `coach_engagement` (typically `post` on DMs that exist for coaching).
+
 **Harness (v1):** scenario `channels[].name` values (e.g. `#team`) are primary async channels. Private coach threads are addressed as `dm/<character_id>` and are not duplicated as separate YAML channel rows.
 
 Together these cover what a separate "scenes" mechanism would offer. There is no parallel high-fidelity execution mode in v1; event-channel narration is the answer.

@@ -63,7 +63,7 @@ Owns the lifecycle of scenarios and runs. Responsibilities:
 - **Timeline / event store** — every meaningful thing that happens in a run is appended as a `TimelineEvent`. Replay is just playing the timeline back.
 - **Cost/usage tracker** — token + spend accounting per run.
 
-There is no separate "coaching service" — coach actions go through the same APIs agents use (`post`, `invoke`, `edit`, etc.) with `author = coach`, and per-channel engagement enforcement done by comms.
+There is no separate "coaching service" — coach actions go through the same APIs agents use (`post`, `invoke`, `edit`, etc.) with `author = coach`, and per-channel engagement enforcement done by comms. The **coach actor** may be a human user (between-turn UI), an autonomous LLM (batch / autonomous mode), or a scripted preset; only the backing logic changes, not the API surface.
 
 ### Agent layer
 
@@ -95,6 +95,8 @@ Interfaces:
 - `tick(turn)` — called by the orchestrator at the start of each simulation phase. Fires due rituals, expires timed-out approvals, applies deterministic vital rules, opens/archives event channels, surfaces deadline warnings.
 - `edit(rule_change)` — used when the coach changes rules between turns. Versioned.
 
+**Process invocation vocabulary (v1, harness).** Agents and the autonomous coach emit structured `process_invocations` in their turn output. Each item is an object with at least a string `kind` (and optional fields for args). The current Python hook in [`harness/engine.py`](../harness/engine.py) **records** recognized kinds on the run timeline as `process_invocation` events; it does **not** yet execute full policy (validate → queue → mutate ledger). Kinds in the v1 allowlist: `consult`, `invoke`, `tick`, `request_approval`, `change_deadline`, `edit_ritual`, `set_gate`. Any other non-empty `kind` is logged as `process_invocation_unhandled` for visibility. **Deferred:** richer kinds such as `introduce_work`, `escalate`, `reassign_person`, `open_channel`, and generic `schedule_ritual` / cancel — add when the engine applies rules and writes through to the ledger.
+
 A scenario may also include a **process steward** character — an ordinary agent that has privileged access to the engine and operates it in-fiction (runs rituals, surfaces violations, talks to the coach). Optional; chaos scenarios omit it and run on a near-empty rulebook.
 
 ### World ledger
@@ -121,6 +123,8 @@ The narrator is the only LLM-using piece of comms. Everything else is determinis
 State:
 
 - **Channels** — id, name, type (`dm` / `group` / `open` / `event`), members, lifecycle status, coach engagement mode (`post` / `read` / `none`), created-on-turn, archived-on-turn, optional bound-event id.
+
+**DM channels (`dm/<character_id>`).** A DM is a **first-class** channel type, not a special case in the UI only. Naming is stable: one private thread between the coach and a given character (that character's id in the path). Membership is exactly `{ coach, that character }`; scenarios do not duplicate the same relationship as an extra row under `channels[]` in YAML — see [`simulation-model.md`](simulation-model.md). Coach engagement on DM is typically `post` for both sides; agent policy may restrict which DMs an agent may use (e.g. own DM only).
 - **Identities** — display name + handle per character. Defined by the scenario.
 - **Messages** — id, channel id, author, turn posted, content, parent message id, parsed mention ids.
 - **Delivery state** — per-agent high-water mark + a separate mention queue (mentions get guaranteed delivery).
