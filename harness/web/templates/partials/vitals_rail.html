@@ -5,22 +5,62 @@
   <ul class="flex flex-col gap-3 list-none p-0 m-0">
     {% for cid, ch in characters.items() %}
     {% set v = (ch.get('vitals') or {}) %}
-    {% set s = (v.get('stress') or 0)|int %}
-    {% set mood_class = 'sprite--idle' %}
-    {% if s > 7 %}{% set mood_class = 'sprite--overloaded' %}
-    {% elif s > 4 %}{% set mood_class = 'sprite--frustrated' %}
-    {% endif %}
-    <li class="panel panel-section flex gap-3 items-center">
-      <div class="sprite {{ mood_class }} shrink-0">{{ (cid[:2])|upper }}</div>
+    {% set expr = expression_from_vitals(v) %}
+    {% set surl = sprite_url(sprite_set, expr) %}
+    {% set sparks = (vitals_sparks or {}).get(cid, {}) %}
+    {% set meta = (char_meta or {}).get(cid, {}) %}
+    <li class="panel panel-section flex gap-3 items-start">
+      {% if surl %}
+      <button
+        type="button"
+        class="sprite sprite--from-asset shrink-0 w-10 h-10 border-0 cursor-pointer p-0"
+        style="background-image: url('{{ surl }}')"
+        title="Open DM"
+        hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
+        hx-target="#center-stage"
+        hx-swap="innerHTML"
+      ></button>
+      {% else %}
+      <button
+        type="button"
+        class="sprite sprite--idle shrink-0 cursor-pointer"
+        hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
+        hx-target="#center-stage"
+        hx-swap="innerHTML"
+      >{{ (cid[:2])|upper }}</button>
+      {% endif %}
       <div class="min-w-0 flex-1 text-sm">
-        <div class="font-semibold">{{ cid }}</div>
-        <div class="text-xs text-[var(--color-text-muted)]">
+        <div class="flex items-center gap-2">
+          <span class="font-semibold">{{ meta.get('name', cid) }}</span>
+          <button
+            type="button"
+            class="text-[0.65rem] text-[var(--color-accent)] hover:underline"
+            hx-get="/partials/run/{{ bundle.url_path }}/inspector/character/{{ cid|urlencode }}?turn={{ effective_turn }}"
+            hx-target="#inspector-body"
+            hx-swap="innerHTML"
+            @click="inspectorOpen = true"
+          >inspect</button>
+        </div>
+        <div class="text-xs text-[var(--color-text-muted)] msg__handle">{{ meta.get('handle', '@' ~ cid) }}</div>
+        <div class="text-xs text-[var(--color-text-muted)] mt-1">
           E {{ v.get('energy','?') }} · M {{ v.get('motivation','?') }} · S {{ v.get('stress','?') }}
         </div>
-        <div class="vital-bar mt-2" title="stress level">
-          <div
-            class="vital-bar__fill {% if s <= 2 %}vital-bar__fill--low{% elif s <= 5 %}vital-bar__fill--mid{% elif s <= 8 %}vital-bar__fill--high{% else %}vital-bar__fill--max{% endif %}"
-          ></div>
+        {% for key, label in [('energy', 'Energy'), ('motivation', 'Motivation'), ('stress', 'Stress')] %}
+        {% set val = v.get(key, 0)|int %}
+        <div class="vital-row">
+          <div class="vital-row__label">{{ label }}</div>
+          <div class="vital-bar" title="{{ label }}">
+            <div
+              class="vital-bar__fill {% if val <= 30 %}vital-bar__fill--low{% elif val <= 55 %}vital-bar__fill--mid{% elif val <= 80 %}vital-bar__fill--high{% else %}vital-bar__fill--max{% endif %}"
+              style="width: {{ [100, val]|min }}%;"
+            ></div>
+          </div>
+        </div>
+        {% endfor %}
+        <div class="flex flex-wrap gap-2 mt-1 text-[var(--color-accent)] opacity-90">
+          <span title="Energy trend">{{ sparks.get('energy', '')|safe }}</span>
+          <span title="Motivation trend">{{ sparks.get('motivation', '')|safe }}</span>
+          <span title="Stress trend">{{ sparks.get('stress', '')|safe }}</span>
         </div>
       </div>
     </li>

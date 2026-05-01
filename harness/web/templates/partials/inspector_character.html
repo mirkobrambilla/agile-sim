@@ -1,0 +1,28 @@
+<div class="inspector-sheet flex flex-col gap-3 text-sm">
+  <div class="flex justify-between items-start gap-2">
+    <h3 class="text-base font-bold">Character · {{ inspect_cid }}</h3>
+    <button type="button" class="text-xs text-[var(--color-text-muted)] hover:underline" @click="inspectorOpen = false">Close</button>
+  </div>
+  {% set v = (inspect_character.get('vitals') or {}) %}
+  <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn }} · E {{ v.get('energy','?') }} · M {{ v.get('motivation','?') }} · S {{ v.get('stress','?') }}</p>
+  {% if inspect_narratives %}
+  <div>
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-1">Recent narratives</h4>
+    <ul class="list-none p-0 m-0 flex flex-col gap-2 max-h-48 overflow-y-auto">
+      {% for row in inspect_narratives %}
+      <li class="text-xs border-l-2 border-[var(--color-border)] pl-2">T{{ row.turn }} — {{ row.narrative }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% if inspect_recent_posts %}
+  <div>
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-1">Channel snippets</h4>
+    <ul class="list-none p-0 m-0 flex flex-col gap-2 max-h-40 overflow-y-auto">
+      {% for m in inspect_recent_posts %}
+      <li class="text-xs"><span class="font-mono text-[var(--color-text-muted)]">{{ m.channel }}</span> · T{{ m.turn }} — {{ m.content[:120] }}{% if m.content|length > 120 %}…{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>

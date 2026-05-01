@@ -1,5 +1,16 @@
-<div class="flex flex-col gap-3 max-w-4xl">
+<div class="flex flex-col gap-4 max-w-4xl">
   <h2 class="text-lg font-semibold">Timeline</h2>
+  <p class="text-xs text-[var(--color-text-muted)]">Turn scrub (jump to replay). Viewing: T{{ effective_turn }}</p>
+  {% if turn_ticks %}
+  <div class="flex flex-wrap gap-2 items-center">
+    {% for t in turn_ticks %}
+    <a
+      href="/runs/{{ url_path }}/at/{{ t }}"
+      class="px-2 py-1 rounded-[var(--radius-sm)] text-xs font-mono border border-[var(--color-border)] {% if t == effective_turn %}bg-[var(--color-accent-teal)] text-white border-transparent{% else %}hover:bg-[var(--color-panel-chrome)]{% endif %}"
+    >T{{ t }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
   <ul class="flex flex-col gap-2 list-none p-0 m-0 text-sm">
     {% for row in bundle.timeline %}
     <li class="panel panel-section py-2">

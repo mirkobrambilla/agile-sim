@@ -404,5 +404,89 @@ def cmd_judge(batch_dir: Path, judge_model: str, secrets: Path | None, max_runs:
     console.print(f"Wrote [bold]{out}[/bold]")
 
 
+@main.group("assets")
+def assets_grp() -> None:
+    """Generate UI images from assets/manifest.yaml via OpenRouter."""
+
+
+@assets_grp.command("list")
+@click.option(
+    "--manifest",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Defaults to assets/manifest.yaml",
+)
+def cmd_assets_list(manifest: Path | None) -> None:
+    from harness.assets import load_manifest, list_status
+
+    root = Path(__file__).resolve().parents[1]
+    m = load_manifest(manifest or (root / "assets" / "manifest.yaml"))
+    for row in list_status(m, root=root):
+        status = "cached" if row["cached"] else ("stale" if row["stale"] else "missing")
+        console.print(
+            f"[{status:7}] {row['set']}/{row['item']:30} {row['path']}",
+        )
+
+
+@assets_grp.command("generate")
+@click.option(
+    "--manifest",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+)
+@click.option("--set", "set_id", default=None, help="Only this set id (e.g. default)")
+@click.option(
+    "--item",
+    "item_ref",
+    default=None,
+    help="Single item SET/item_id (e.g. default/happy)",
+)
+@click.option("--force", is_flag=True, help="Ignore hash cache")
+@click.option("--dry-run", is_flag=True, help="Print jobs only; no API calls")
+@click.option("--secrets", type=click.Path(path_type=Path), default=None)
+def cmd_assets_generate(
+    manifest: Path | None,
+    set_id: str | None,
+    item_ref: str | None,
+    force: bool,
+    dry_run: bool,
+    secrets: Path | None,
+) -> None:
+    from harness.assets import filter_jobs, load_manifest, plan_jobs, run_jobs
+    from harness.integrations.openrouter import OpenRouterClient
+    from harness.runner import load_api_key
+
+    root = Path(__file__).resolve().parents[1]
+    man_path = manifest or (root / "assets" / "manifest.yaml")
+    m = load_manifest(man_path)
+    jobs = plan_jobs(m, root=root)
+    jobs = filter_jobs(jobs, set_id=set_id, item_ref=item_ref)
+    if not jobs:
+        console.print("[yellow]No jobs matched filters.[/yellow]")
+        raise SystemExit(1)
+
+    if dry_run:
+        client = None
+    else:
+        key = load_api_key(secrets)
+        client = OpenRouterClient(api_key=key)
+
+    rep = run_jobs(
+        jobs,
+        client,
+        force=force,
+        dry_run=dry_run,
+        on_progress=lambda msg: console.print(f"[dim]{msg}[/dim]"),
+    )
+    console.print(
+        f"planned={rep.planned} skipped={rep.skipped} generated={rep.generated} "
+        f"would={rep.would_generate} failed={rep.failed}",
+    )
+    for e in rep.errors:
+        console.print(f"[red]{e}[/red]")
+    if rep.failed:
+        raise SystemExit(1)
+
+
 if __name__ == "__main__":
     main()

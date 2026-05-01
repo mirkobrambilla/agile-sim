@@ -1,11 +1,37 @@
 <div class="flex flex-col gap-3">
   <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] tracking-wide">Goals</h3>
   {% if goal_status == 'ok' %}
-  <p class="stoplight stoplight--ok">Goal satisfied</p>
+  <p class="stoplight stoplight--ok">Run goal satisfied</p>
   {% elif goal_status == 'fail' %}
   <p class="stoplight stoplight--fail">Run ended under stress</p>
   {% else %}
-  <p class="stoplight stoplight--warn">Goal not met</p>
+  <p class="stoplight stoplight--warn">Goal not met at end of run</p>
   {% endif %}
-  <p class="text-xs text-[var(--color-text-muted)]">Read-only snapshot; edit scenario before running new sims.</p>
+  {% if goal_rows %}
+  <div class="flex flex-col gap-0 mt-1">
+    {% for row in goal_rows %}
+    <div class="goal-row">
+      <span class="stoplight stoplight--{% if row.stoplight == 'ok' %}ok{% elif row.stoplight == 'fail' %}fail{% else %}warn{% endif %} text-lg leading-none shrink-0">●</span>
+      <div class="min-w-0 flex-1">
+        <div class="goal-row__title"><span class="font-mono text-xs text-[var(--color-text-muted)]">{{ row.id }}</span> · {{ row.title }}</div>
+        <div class="goal-row__state">state: {{ row.state }}</div>
+      </div>
+      <button
+        type="button"
+        class="text-xs text-[var(--color-accent)] shrink-0 hover:underline"
+        hx-get="/partials/run/{{ bundle.url_path }}/inspector/work_item/{{ row.id|urlencode }}?turn={{ effective_turn }}"
+        hx-target="#inspector-body"
+        hx-swap="innerHTML"
+        @click="inspectorOpen = true"
+      >i</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% elif require_done_ids %}
+  <p class="text-xs text-[var(--color-text-muted)]">Outcome ids {{ require_done_ids|join(', ') }} (no snapshot for this turn).</p>
+  {% endif %}
+  <p class="topbar-chip w-fit text-[var(--color-text)]">
+    Work done: {{ work_done_count }} / {{ work_total }}
+  </p>
+  <p class="text-xs text-[var(--color-text-muted)]">Read-only replay; open runs from home or picker.</p>
 </div>

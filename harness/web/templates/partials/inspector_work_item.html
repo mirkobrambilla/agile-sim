@@ -1,0 +1,24 @@
+<div class="inspector-sheet flex flex-col gap-3 text-sm">
+  <div class="flex justify-between items-start gap-2">
+    <h3 class="text-base font-bold">Work item · {{ inspect_wi_id }}</h3>
+    <button type="button" class="text-xs text-[var(--color-text-muted)] hover:underline" @click="inspectorOpen = false">Close</button>
+  </div>
+  {% if inspect_wi %}
+  <p class="font-medium">{{ inspect_wi.get('title','') }}</p>
+  <p class="text-xs text-[var(--color-text-muted)]">state: {{ inspect_wi.get('state') }} · owner: {{ inspect_wi.get('owner_id','') }}</p>
+  {% else %}
+  <p class="text-[var(--color-text-muted)]">Not present in this turn snapshot.</p>
+  {% endif %}
+  {% if inspect_wi_events %}
+  <div>
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-1">Timeline updates</h4>
+    <ul class="list-none p-0 m-0 flex flex-col gap-2 max-h-56 overflow-y-auto">
+      {% for ev in inspect_wi_events %}
+      <li class="text-xs border-l-2 border-[var(--color-border)] pl-2">
+        T{{ ev.turn }} · {{ ev.character }} — <code class="font-mono text-[0.65rem]">{{ ev.update|tojson }}</code>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>

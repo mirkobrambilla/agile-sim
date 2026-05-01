@@ -194,6 +194,141 @@
     background-color: var(--mood-proud);
   }
 
+  .sprite--from-asset {
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    color: transparent;
+    font-size: 0;
+    overflow: hidden;
+  }
+
+  .msg__row {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  .msg__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: baseline;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
+  }
+
+  .msg__handle {
+    font-family: var(--font-mono);
+    color: var(--color-accent-teal);
+  }
+
+  .msg__reactions {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    min-height: 1.5rem;
+    align-items: center;
+  }
+
+  .msg__react-slot {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--radius-sm);
+    border: 1px dashed var(--color-border);
+    background: var(--color-bg-app);
+    opacity: 0.5;
+  }
+
+  .msg__react-slot:hover {
+    opacity: 0.9;
+    border-color: var(--color-accent);
+  }
+
+  .vital-row {
+    margin-top: var(--space-2);
+  }
+
+  .vital-row__label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
+  }
+
+  .vital-spark {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 1.25rem;
+    margin-top: var(--space-2);
+  }
+
+  .vital-spark__bar {
+    flex: 1;
+    min-width: 3px;
+    background: var(--color-border);
+    border-radius: 1px;
+  }
+
+  .goal-row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.8rem;
+  }
+
+  .goal-row:last-child {
+    border-bottom: none;
+  }
+
+  .goal-row__title {
+    font-weight: 600;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .goal-row__state {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+  }
+
+  .topbar-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    background: var(--color-panel-chrome);
+  }
+
+  .kanban-loadbar {
+    height: 0.35rem;
+    border-radius: 9999px;
+    background: var(--color-border);
+    overflow: hidden;
+  }
+
+  .kanban-loadbar__fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: var(--color-accent-teal);
+  }
+
+  .kanban-person-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
   .banner-replay {
     background: var(--color-accent-gold);
     color: var(--color-text);

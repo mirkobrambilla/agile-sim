@@ -160,6 +160,59 @@ def build_world_from_scenario(
     )
 
 
+def world_from_snapshot(data: dict[str, Any]) -> World:
+    """Rebuild a World from `world.snapshot()`-shaped dict (e.g. last snapshots.jsonl row)."""
+
+    chars_raw = data.get("characters") or {}
+    chars: dict[str, CharacterState] = {}
+    for cid, c in chars_raw.items():
+        if not isinstance(c, dict):
+            continue
+        cid_s = str(c.get("id", cid))
+        chars[cid_s] = CharacterState(
+            id=cid_s,
+            name=str(c.get("name", cid_s)),
+            role=str(c.get("role", "")),
+            backstory=str(c.get("backstory", "")),
+            vitals={k: int(v) for k, v in (c.get("vitals") or {}).items()},
+        )
+    items: list[WorkItemState] = []
+    for w in data.get("work_items") or []:
+        if not isinstance(w, dict):
+            continue
+        items.append(
+            WorkItemState(
+                id=str(w.get("id", "")),
+                title=str(w.get("title", "")),
+                state=str(w.get("state", "backlog")).lower(),
+                owner_id=str(w.get("owner_id", "")),
+            )
+        )
+    msgs: list[Message] = []
+    for m in data.get("messages") or []:
+        if not isinstance(m, dict):
+            continue
+        msgs.append(
+            Message(
+                id=str(m.get("id", "")),
+                turn=int(m.get("turn", 0)),
+                author=str(m.get("author", "")),
+                channel=str(m.get("channel", "")),
+                content=str(m.get("content", "")),
+            )
+        )
+    return World(
+        turn=int(data.get("turn", 1)),
+        max_turns=int(data.get("max_turns", 10)),
+        goals=dict(data.get("goals") or {}),
+        characters=chars,
+        work_items=items,
+        org={k: int(v) for k, v in (data.get("org") or {}).items()},
+        messages=msgs,
+        team_members={str(k): list(v) for k, v in (data.get("team_members") or {}).items()},
+    )
+
+
 def normalize_coach_engagement(raw: str | None) -> str:
     v = (raw or "post").strip().lower()
     return v if v in {"post", "read", "none"} else "post"

@@ -49,6 +49,13 @@ def test_runner_and_partials(tmp_path: Path) -> None:
     assert "run_web" in r.text
     p = c.get("/partials/run/run_web/kanban?turn=1")
     assert p.status_code == 200
+    assert c.get("/partials/run/run_web/roster?turn=1").status_code == 200
+    assert c.get("/partials/run/run_web/inspector/character/a?turn=1").status_code == 200
+    assert c.get("/partials/run/run_web/inspector/work_item/w1?turn=1").status_code == 200
+    assert c.get("/partials/run/run_web/inspector/channel?channel=%23team&turn=1").status_code == 200
+    t = c.get("/partials/run/run_web/timeline?turn=1")
+    assert t.status_code == 200
+    assert "T1" in t.text or "turn" in t.text
 
 
 def test_batch_run_path_redirects_to_experiments(tmp_path: Path) -> None:

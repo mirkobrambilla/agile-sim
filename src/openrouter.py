@@ -280,9 +280,30 @@ class OpenRouterClient:
         )
         if image_bytes:
             output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_bytes(image_bytes)
+            suffix = _image_bytes_format_suffix(image_bytes)
+            dest = output_path.with_suffix(suffix)
+            stem = output_path.with_suffix("")
+            if dest != output_path and output_path.exists():
+                output_path.unlink()
+            for ext in (".png", ".jpg", ".jpeg", ".webp"):
+                other = stem.with_suffix(ext)
+                if other != dest and other.exists():
+                    other.unlink()
+            dest.write_bytes(image_bytes)
             return True
         return False
+
+
+def _image_bytes_format_suffix(data: bytes) -> str:
+    """Pick ``.png``, ``.jpg``, or ``.webp`` from magic bytes (API may return JPEG)."""
+
+    if len(data) >= 8 and data[:8] == b"\x89PNG\r\n\x1a\n":
+        return ".png"
+    if len(data) >= 3 and data[:3] == b"\xff\xd8\xff":
+        return ".jpg"
+    if len(data) >= 12 and data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return ".webp"
+    return ".png"
 
 
 def _extract_image(data: dict) -> bytes | None:

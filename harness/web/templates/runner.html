@@ -7,14 +7,24 @@
 {% block body %}
 {% set totals = bundle.summary.get('totals') or {} %}
 {% set cost = totals.get('cost') %}
+{% set scen = scenario if scenario is defined else {} %}
 <div
-  class="flex flex-col min-h-screen"
-  x-data="runnerShell({ liveTurn: {{ effective_turn }}, viewingTurn: {{ effective_turn }}, defaultView: 'channels' })"
+  class="flex flex-col min-h-screen relative"
+  x-data="runnerShell({ liveTurn: {{ live_turn }}, viewingTurn: {{ effective_turn }}, defaultView: 'channels' })"
 >
+  {% if viewing_replay %}
+  <div class="banner-replay shrink-0 flex flex-wrap items-center justify-between gap-2">
+    <span>Viewing turn {{ effective_turn }} (latest completed in this tab is {{ live_turn }})</span>
+    <a class="underline font-semibold" href="/runs/{{ bundle.url_path }}">Return to latest</a>
+  </div>
+  {% endif %}
   <header class="topbar shrink-0">
-    <div class="flex flex-wrap items-center gap-4 px-4 py-3">
+    <div class="flex flex-wrap items-center gap-3 px-4 py-3">
       <a href="/" class="text-sm text-[var(--color-text-muted)] hover:underline">← All runs</a>
       <h1 class="text-base font-bold font-[family-name:var(--font-mono)]">{{ bundle.run_dir.name }}</h1>
+      {% if scen.get('id') %}
+      <span class="topbar-chip text-[var(--color-text-muted)]">scenario <span class="font-mono text-[var(--color-text)]">{{ scen.get('id') }}</span></span>
+      {% endif %}
       <label class="flex items-center gap-2 text-sm">
         <span class="text-[var(--color-text-muted)]">Turn</span>
         <select
@@ -33,18 +43,33 @@
       {% else %}
       <span class="stoplight stoplight--warn">Review</span>
       {% endif %}
+      {% if goal_rows %}
+      <span class="topbar-chip hidden md:inline-flex" title="Outcome work items">
+        {% for row in goal_rows %}
+        <span class="stoplight stoplight--{% if row.stoplight == 'ok' %}ok{% else %}warn{% endif %} text-sm">●</span>
+        <span class="font-mono text-xs">{{ row.id }}</span>{% if not loop.last %}·{% endif %}
+        {% endfor %}
+      </span>
+      {% endif %}
+      <span class="topbar-chip">{{ effective_turn }} / {{ max_turn }}</span>
       <span class="chip ml-auto">
         Cost
         {% if cost is not none %}
         ${{ '%.4f'|format(cost) }}
         {% else %}—{% endif %}
       </span>
+      {% if live_session %}
+      <form hx-post="/runs/{{ bundle.url_path }}/advance" hx-swap="none" class="inline">
+        <button type="submit" class="btn btn-primary text-sm">Advance turn</button>
+      </form>
+      {% endif %}
     </div>
   </header>
 
   <div class="flex flex-1 min-h-0">
     <aside class="app-rail w-12 shrink-0 flex flex-col items-center py-4 gap-3">
       <a href="/" class="text-lg" title="Home">🏠</a>
+      <a href="/new" class="text-lg" title="New live run">＋</a>
       <span class="text-lg opacity-40" title="Runner">▶</span>
     </aside>
 
@@ -86,7 +111,15 @@
           <button
             type="button"
             class="btn btn-ghost justify-start text-sm"
-            hx-get="/partials/run/{{ bundle.url_path }}/timeline"
+            hx-get="/partials/run/{{ bundle.url_path }}/roster?turn={{ effective_turn }}"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            @click="setView('roster')"
+          >Roster</button>
+          <button
+            type="button"
+            class="btn btn-ghost justify-start text-sm"
+            hx-get="/partials/run/{{ bundle.url_path }}/timeline?turn={{ effective_turn }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
             @click="setView('timeline')"
@@ -109,13 +142,32 @@
       {% include "partials/channel_view.html" %}
     </div>
 
-    <aside class="right-rail w-72 shrink-0 flex flex-col gap-4 py-4 px-3 overflow-y-auto border-l border-[var(--color-border)]">
+    <aside class="right-rail w-72 shrink-0 flex flex-col gap-4 py-4 px-3 overflow-y-auto border-l border-[var(--color-border)] relative">
       <div id="goals-panel">
         {% include "partials/goals_panel.html" %}
       </div>
       <div id="vitals-rail">
         {% set characters = (snap_world.get('characters') or {}) if snap_world else {} %}
         {% include "partials/vitals_rail.html" %}
+      </div>
+    </aside>
+  </div>
+
+  <div
+    class="inspector-drawer fixed inset-0 z-40 flex flex-row"
+    x-show="inspectorOpen"
+    x-cloak
+    x-transition
+  >
+    <button
+      type="button"
+      class="flex-1 min-w-0 bg-black/25 cursor-default"
+      aria-label="Close inspector"
+      @click="inspectorOpen = false"
+    ></button>
+    <aside class="pointer-events-auto w-full max-w-md h-full overflow-y-auto p-4 bg-[var(--color-bg-panel)] border-l border-[var(--color-border)] shadow-xl" id="inspector-panel">
+      <div id="inspector-body" class="text-sm text-[var(--color-text)]">
+        <p class="text-[var(--color-text-muted)] text-xs">Click “inspect” on goals, vitals, roster, or “Inspect channel”.</p>
       </div>
     </aside>
   </div>

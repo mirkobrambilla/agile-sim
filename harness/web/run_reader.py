@@ -81,6 +81,139 @@ def _scenario_dict_from_meta(meta: dict[str, Any]) -> dict[str, Any]:
     return yaml.safe_load(p.read_text(encoding="utf-8")) or {}
 
 
+def scenario_from_bundle_meta(meta: dict[str, Any]) -> dict[str, Any]:
+    """Public: load scenario YAML dict referenced by run meta."""
+
+    return _scenario_dict_from_meta(meta)
+
+
+def vitals_history_for_character(
+    bundle: RunBundle, char_id: str, vital: str
+) -> list[tuple[int, int]]:
+    """(turn, value) pairs from snapshots."""
+
+    out: list[tuple[int, int]] = []
+    cid = str(char_id)
+    for s in bundle.snapshots:
+        chars = (s.world or {}).get("characters") or {}
+        ch = chars.get(cid)
+        if ch is None and cid in chars:
+            ch = chars[cid]
+        if not isinstance(ch, dict):
+            continue
+        v = (ch.get("vitals") or {}).get(vital)
+        if v is None:
+            continue
+        try:
+            out.append((int(s.turn), int(v)))
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def recent_posts_for_character(
+    bundle: RunBundle, char_id: str, *, limit: int = 8
+) -> list[UiMessage]:
+    """Messages in this character's DM thread plus any channel posts they authored."""
+
+    cid = str(char_id)
+    buf: list[UiMessage] = []
+    dm = f"dm/{cid}"
+    for ch, msgs in bundle.messages_by_channel.items():
+        if ch == dm:
+            buf.extend(msgs)
+            continue
+        for m in msgs:
+            if m.author == cid:
+                buf.append(m)
+    buf.sort(key=lambda x: (x.turn, x.id))
+    return buf[-limit:]
+
+
+def agent_narrative_snippets(bundle: RunBundle, char_id: str, *, limit: int = 12) -> list[dict[str, Any]]:
+    """Recent agent_turn narrative lines for a character."""
+
+    cid = str(char_id)
+    buf: list[dict[str, Any]] = []
+    for row in bundle.timeline:
+        if row.kind != "agent_turn":
+            continue
+        if str(row.raw.get("character") or "") != cid:
+            continue
+        buf.append(
+            {
+                "turn": row.raw.get("turn"),
+                "narrative": row.raw.get("narrative") or "",
+            }
+        )
+    return buf[-limit:]
+
+
+def work_item_timeline_events(bundle: RunBundle, work_item_id: str) -> list[dict[str, Any]]:
+    """Rows from timeline agent_turn entries touching this work item id."""
+
+    wid = str(work_item_id)
+    rows: list[dict[str, Any]] = []
+    for row in bundle.timeline:
+        if row.kind != "agent_turn":
+            continue
+        raw = row.raw
+        for wu in raw.get("work_updates") or []:
+            iid = str(wu.get("id") or wu.get("work_item_id") or "")
+            if iid == wid:
+                rows.append(
+                    {
+                        "turn": raw.get("turn"),
+                        "character": raw.get("character"),
+                        "update": wu,
+                    }
+                )
+    return rows
+
+
+def channel_meta_for(
+    bundle: RunBundle, channel: str, scenario: dict[str, Any]
+) -> dict[str, Any]:
+    ch = channel.strip()
+    members: list[str] = []
+    engagement = "post"
+    if ch.startswith("dm/"):
+        owner = ch[3:].strip()
+        members = ["coach", owner] if owner else ["coach"]
+    else:
+        for cdef in scenario.get("channels") or []:
+            name = str(cdef.get("name", "")).strip()
+            if name == ch:
+                members = [str(x) for x in (cdef.get("member_ids") or [])]
+                engagement = str(cdef.get("coach_engagement") or "post")
+                break
+    n_msgs = len(bundle.messages_by_channel.get(ch, []))
+    return {"channel": ch, "members": members, "coach_engagement": engagement, "message_count": n_msgs}
+
+
+def svg_sparkline(values: list[int], *, width: int = 120, height: int = 28) -> str:
+    """Minimal SVG polyline; color via currentColor in CSS."""
+
+    if not values:
+        return ""
+    w, h = width, height
+    lo, hi = min(values), max(values)
+    if hi == lo:
+        hi = lo + 1
+    pts: list[str] = []
+    for i, v in enumerate(values):
+        x = 2 + (i / max(1, len(values) - 1)) * (w - 4)
+        y = h - 3 - (v - lo) / (hi - lo) * (h - 6)
+        pts.append(f"{x:.1f},{y:.1f}")
+    pstr = " ".join(pts)
+    return (
+        f'<svg class="vital-spark-svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+        'xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+        f'<polyline fill="none" stroke="currentColor" stroke-width="1.5" points="{pstr}"/>'
+        "</svg>"
+    )
+
+
 def _fmt_utc_mtime(mtime: float) -> str:
     return datetime.fromtimestamp(mtime, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 

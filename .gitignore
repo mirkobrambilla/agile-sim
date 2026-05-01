@@ -14,3 +14,8 @@ build/
 
 # Tailwind build output (run scripts/build_css.sh)
 harness/web/static/css/app.css
+
+# Generated images (manifest: assets/manifest.yaml; run agile-harness assets generate)
+harness/web/static/sprites/
+harness/web/static/covers/
+assets/.log/

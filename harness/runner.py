@@ -181,6 +181,244 @@ def apply_coach_output(
     return rejected
 
 
+def step_turn(
+    world: World,
+    bundle: ScenarioBundle,
+    client: Any,
+    *,
+    agent_model: str,
+    coach_model: str,
+    run_root: Path,
+    vital_delta_cap: int,
+    coach_nudge_cap: int,
+    coach_mode: str,
+    coach_preset: dict[str, Any] | None,
+    preset_id: str | None,
+    channel: str,
+    order: list[str],
+    verbose: bool,
+    progress_prefix: str,
+) -> tuple[dict[str, int | float], str | None]:
+    """Run one simulation turn (agents + coach), persist artifacts, maybe advance `world.turn`.
+
+    Returns ``(usage_delta, stop_reason)`` where ``stop_reason`` is ``goal_met``,
+    ``aborted_stress``, or ``None`` (continue / exhausted max turn slot handled by caller
+    via ``while world.turn <= world.max_turns``).
+    """
+
+    timeline = run_root / "timeline.jsonl"
+    snapshots = run_root / "snapshots.jsonl"
+    msgs_path = run_root / "messages.jsonl"
+    llm_log = run_root / "llm_calls.jsonl"
+
+    tokens_in = 0
+    tokens_out = 0
+    cost = 0.0
+
+    _append_jsonl(timeline, {"kind": "turn_start", "turn": world.turn})
+    for ev in engine.tick(world, bundle):
+        _append_jsonl(timeline, ev)
+    _progress(verbose, progress_prefix, f"--- turn {world.turn} / {world.max_turns} ---")
+
+    for cid in order:
+        t0 = time.perf_counter()
+        try:
+            out, _raw, usage = run_agent_turn(
+                client=client,
+                model=agent_model,
+                bundle=bundle,
+                world=world,
+                char_id=cid,
+                vital_delta_cap=vital_delta_cap,
+            )
+        except Exception as err:  # noqa: BLE001
+            _append_jsonl(
+                timeline,
+                {"kind": "parse_error", "turn": world.turn, "who": cid, "error": str(err)},
+            )
+            out = AgentTurnOutput(narrative="(agent call failed)", channel_posts=[])
+            usage = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
+
+        dt_ms = int((time.perf_counter() - t0) * 1000)
+        tokens_in += int(usage.get("input_tokens", 0))
+        tokens_out += int(usage.get("output_tokens", 0))
+        cost += float(usage.get("cost", 0) or 0)
+        _append_jsonl(
+            llm_log,
+            {
+                "turn": world.turn,
+                "role": "agent",
+                "character": cid,
+                "model": agent_model,
+                "usage": usage,
+                "latency_ms": dt_ms,
+            },
+        )
+        for rej in apply_agent_output(
+            world,
+            cid,
+            out,
+            vital_delta_cap=vital_delta_cap,
+            channel=channel,
+            scenario=bundle.scenario,
+        ):
+            _append_jsonl(timeline, {"kind": "post_rejected", "turn": world.turn, **rej})
+        for ev in engine.apply_process_invocations(
+            out.process_invocations,
+            world=world,
+            bundle=bundle,
+            source=f"agent:{cid}",
+            turn=world.turn,
+        ):
+            _append_jsonl(timeline, ev)
+        _append_jsonl(
+            timeline,
+            {
+                "kind": "agent_turn",
+                "turn": world.turn,
+                "character": cid,
+                "narrative": out.narrative,
+                "posts": [p.model_dump() for p in out.channel_posts],
+                "vital_deltas": out.vital_self_report,
+                "work_updates": out.work_item_updates,
+            },
+        )
+        tin, tout = int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0))
+        cst = float(usage.get("cost", 0) or 0)
+        _progress(
+            verbose,
+            progress_prefix,
+            f"  agent  {cid:12}  {dt_ms:5} ms  model={agent_model}  tok {tin}+{tout}  ${cst:.4f}",
+        )
+
+    t0_coach = time.perf_counter()
+    coach_logged_model = coach_model
+    try:
+        if coach_mode == "none":
+            cout = CoachTurnOutput()
+            usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
+            coach_logged_model = "none"
+            _append_jsonl(
+                llm_log,
+                {
+                    "turn": world.turn,
+                    "role": "coach",
+                    "model": coach_logged_model,
+                    "usage": usage_c,
+                    "latency_ms": 0,
+                    "source": "none",
+                },
+            )
+        elif coach_mode == "preset" and coach_preset:
+            cout = coach_turn_from_preset(coach_preset, world.turn, default_channel=channel)
+            usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
+            coach_logged_model = f"preset:{preset_id or 'file'}"
+            _append_jsonl(
+                llm_log,
+                {
+                    "turn": world.turn,
+                    "role": "coach",
+                    "model": coach_logged_model,
+                    "usage": usage_c,
+                    "latency_ms": int((time.perf_counter() - t0_coach) * 1000),
+                    "source": "preset",
+                },
+            )
+        elif coach_mode == "human":
+            cout = CoachTurnOutput()
+            usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
+            coach_logged_model = "human"
+            _append_jsonl(
+                llm_log,
+                {
+                    "turn": world.turn,
+                    "role": "coach",
+                    "model": coach_logged_model,
+                    "usage": usage_c,
+                    "latency_ms": 0,
+                    "source": "human",
+                },
+            )
+        else:
+            cout, _raw_c, usage_c = run_coach_turn(
+                client=client,
+                model=coach_model,
+                bundle=bundle,
+                world=world,
+                nudge_cap=coach_nudge_cap,
+            )
+            _append_jsonl(
+                llm_log,
+                {
+                    "turn": world.turn,
+                    "role": "coach",
+                    "model": coach_model,
+                    "usage": usage_c,
+                    "latency_ms": int((time.perf_counter() - t0_coach) * 1000),
+                    "source": "llm",
+                },
+            )
+    except Exception as err:  # noqa: BLE001
+        _append_jsonl(
+            timeline,
+            {"kind": "parse_error", "turn": world.turn, "who": "coach", "error": str(err)},
+        )
+        cout = CoachTurnOutput()
+        usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
+
+    coach_dt_ms = int((time.perf_counter() - t0_coach) * 1000)
+    tokens_in += int(usage_c.get("input_tokens", 0))
+    tokens_out += int(usage_c.get("output_tokens", 0))
+    cost += float(usage_c.get("cost", 0) or 0)
+    for rej in apply_coach_output(
+        world, cout, channel, coach_nudge_cap, scenario=bundle.scenario
+    ):
+        _append_jsonl(timeline, {"kind": "post_rejected", "turn": world.turn, **rej})
+    for ev in engine.apply_process_invocations(
+        cout.process_invocations,
+        world=world,
+        bundle=bundle,
+        source="coach",
+        turn=world.turn,
+    ):
+        _append_jsonl(timeline, ev)
+    cin_c, cout_c = int(usage_c.get("input_tokens", 0)), int(usage_c.get("output_tokens", 0))
+    c_cost = float(usage_c.get("cost", 0) or 0)
+    n_cposts = len(cout.channel_posts or [])
+    n_cnudges = len(cout.vital_nudges or [])
+    _progress(
+        verbose,
+        progress_prefix,
+        f"  coach {str(coach_logged_model):14} {coach_dt_ms:5} ms  "
+        f"source={coach_mode}  tok {cin_c}+{cout_c}  ${c_cost:.4f}  "
+        f"posts={n_cposts} nudges={n_cnudges}",
+    )
+    _append_jsonl(
+        timeline,
+        {
+            "kind": "coach_turn",
+            "turn": world.turn,
+            "source": coach_mode,
+            "narrative": cout.narrative,
+            "nudges": cout.vital_nudges,
+            "posts": [p.model_dump() for p in cout.channel_posts],
+        },
+    )
+
+    _append_jsonl(snapshots, {"turn": world.turn, "world": world.snapshot()})
+    _write_messages_jsonl(msgs_path, world.messages)
+
+    if goal_met(world):
+        _progress(verbose, progress_prefix, "stop: goal_met")
+        return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, "goal_met"
+    if goal_abort(world):
+        _progress(verbose, progress_prefix, "stop: aborted_stress")
+        return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, "aborted_stress"
+
+    world.turn += 1
+    return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, None
+
+
 def run_once(
     bundle: ScenarioBundle,
     client: Any,
@@ -214,9 +452,6 @@ def run_once(
         raise ValueError("coach_mode=preset requires a loaded coach preset")
 
     timeline = run_root / "timeline.jsonl"
-    snapshots = run_root / "snapshots.jsonl"
-    msgs_path = run_root / "messages.jsonl"
-    llm_log = run_root / "llm_calls.jsonl"
 
     tokens_in = 0
     tokens_out = 0
@@ -247,185 +482,28 @@ def run_once(
     start_clock = time.perf_counter()
 
     while world.turn <= world.max_turns:
-        _append_jsonl(timeline, {"kind": "turn_start", "turn": world.turn})
-        for ev in engine.tick(world, bundle):
-            _append_jsonl(timeline, ev)
-        _progress(verbose, progress_prefix, f"--- turn {world.turn} / {world.max_turns} ---")
-
-        for cid in order:
-            t0 = time.perf_counter()
-            try:
-                out, _raw, usage = run_agent_turn(
-                    client=client,
-                    model=agent_model,
-                    bundle=bundle,
-                    world=world,
-                    char_id=cid,
-                    vital_delta_cap=vital_delta_cap,
-                )
-            except Exception as err:  # noqa: BLE001
-                _append_jsonl(
-                    timeline,
-                    {"kind": "parse_error", "turn": world.turn, "who": cid, "error": str(err)},
-                )
-                out = AgentTurnOutput(narrative="(agent call failed)", channel_posts=[])
-                usage = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
-
-            dt_ms = int((time.perf_counter() - t0) * 1000)
-            tokens_in += int(usage.get("input_tokens", 0))
-            tokens_out += int(usage.get("output_tokens", 0))
-            cost += float(usage.get("cost", 0) or 0)
-            _append_jsonl(llm_log, {
-                "turn": world.turn, "role": "agent", "character": cid,
-                "model": agent_model, "usage": usage, "latency_ms": dt_ms,
-            })
-            for rej in apply_agent_output(
-                world,
-                cid,
-                out,
-                vital_delta_cap=vital_delta_cap,
-                channel=channel,
-                scenario=bundle.scenario,
-            ):
-                _append_jsonl(
-                    timeline,
-                    {"kind": "post_rejected", "turn": world.turn, **rej},
-                )
-            for ev in engine.apply_process_invocations(
-                out.process_invocations,
-                world=world,
-                bundle=bundle,
-                source=f"agent:{cid}",
-                turn=world.turn,
-            ):
-                _append_jsonl(timeline, ev)
-            _append_jsonl(
-                timeline,
-                {
-                    "kind": "agent_turn",
-                    "turn": world.turn,
-                    "character": cid,
-                    "narrative": out.narrative,
-                    "posts": [p.model_dump() for p in out.channel_posts],
-                    "vital_deltas": out.vital_self_report,
-                    "work_updates": out.work_item_updates,
-                },
-            )
-            tin, tout = int(usage.get("input_tokens", 0)), int(usage.get("output_tokens", 0))
-            cst = float(usage.get("cost", 0) or 0)
-            _progress(
-                verbose,
-                progress_prefix,
-                f"  agent  {cid:12}  {dt_ms:5} ms  model={agent_model}  tok {tin}+{tout}  ${cst:.4f}",
-            )
-
-        t0_coach = time.perf_counter()
-        coach_logged_model = coach_model
-        try:
-            if coach_mode == "none":
-                cout = CoachTurnOutput()
-                usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
-                coach_logged_model = "none"
-                _append_jsonl(
-                    llm_log,
-                    {
-                        "turn": world.turn,
-                        "role": "coach",
-                        "model": coach_logged_model,
-                        "usage": usage_c,
-                        "latency_ms": 0,
-                        "source": "none",
-                    },
-                )
-            elif coach_mode == "preset" and coach_preset:
-                cout = coach_turn_from_preset(
-                    coach_preset, world.turn, default_channel=channel
-                )
-                usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
-                coach_logged_model = f"preset:{preset_id or 'file'}"
-                _append_jsonl(
-                    llm_log,
-                    {
-                        "turn": world.turn,
-                        "role": "coach",
-                        "model": coach_logged_model,
-                        "usage": usage_c,
-                        "latency_ms": int((time.perf_counter() - t0_coach) * 1000),
-                        "source": "preset",
-                    },
-                )
-            else:
-                cout, _raw_c, usage_c = run_coach_turn(
-                    client=client,
-                    model=coach_model,
-                    bundle=bundle,
-                    world=world,
-                    nudge_cap=coach_nudge_cap,
-                )
-                _append_jsonl(llm_log, {
-                    "turn": world.turn, "role": "coach", "model": coach_model,
-                    "usage": usage_c,
-                    "latency_ms": int((time.perf_counter() - t0_coach) * 1000),
-                    "source": "llm",
-                })
-        except Exception as err:  # noqa: BLE001
-            _append_jsonl(
-                timeline,
-                {"kind": "parse_error", "turn": world.turn, "who": "coach", "error": str(err)},
-            )
-            cout = CoachTurnOutput()
-            usage_c = {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}
-
-        coach_dt_ms = int((time.perf_counter() - t0_coach) * 1000)
-        tokens_in += int(usage_c.get("input_tokens", 0))
-        tokens_out += int(usage_c.get("output_tokens", 0))
-        cost += float(usage_c.get("cost", 0) or 0)
-        for rej in apply_coach_output(
-            world, cout, channel, coach_nudge_cap, scenario=bundle.scenario
-        ):
-            _append_jsonl(timeline, {"kind": "post_rejected", "turn": world.turn, **rej})
-        for ev in engine.apply_process_invocations(
-            cout.process_invocations,
-            world=world,
-            bundle=bundle,
-            source="coach",
-            turn=world.turn,
-        ):
-            _append_jsonl(timeline, ev)
-        cin_c, cout_c = int(usage_c.get("input_tokens", 0)), int(usage_c.get("output_tokens", 0))
-        c_cost = float(usage_c.get("cost", 0) or 0)
-        n_cposts = len(cout.channel_posts or [])
-        n_cnudges = len(cout.vital_nudges or [])
-        _progress(
-            verbose,
-            progress_prefix,
-            f"  coach {str(coach_logged_model):14} {coach_dt_ms:5} ms  "
-            f"source={coach_mode}  tok {cin_c}+{cout_c}  ${c_cost:.4f}  "
-            f"posts={n_cposts} nudges={n_cnudges}",
+        du, stop = step_turn(
+            world,
+            bundle,
+            client,
+            agent_model=agent_model,
+            coach_model=coach_model,
+            run_root=run_root,
+            vital_delta_cap=vital_delta_cap,
+            coach_nudge_cap=coach_nudge_cap,
+            coach_mode=coach_mode,
+            coach_preset=coach_preset,
+            preset_id=preset_id,
+            channel=channel,
+            order=order,
+            verbose=verbose,
+            progress_prefix=progress_prefix,
         )
-        _append_jsonl(
-            timeline,
-            {
-                "kind": "coach_turn",
-                "turn": world.turn,
-                "source": coach_mode,
-                "narrative": cout.narrative,
-                "nudges": cout.vital_nudges,
-                "posts": [p.model_dump() for p in cout.channel_posts],
-            },
-        )
-
-        _append_jsonl(snapshots, {"turn": world.turn, "world": world.snapshot()})
-        _write_messages_jsonl(msgs_path, world.messages)
-
-        if goal_met(world):
-            _progress(verbose, progress_prefix, "stop: goal_met")
+        tokens_in += int(du["input_tokens"])
+        tokens_out += int(du["output_tokens"])
+        cost += float(du["cost"])
+        if stop:
             break
-        if goal_abort(world):
-            _progress(verbose, progress_prefix, "stop: aborted_stress")
-            break
-
-        world.turn += 1
 
     if verbose and not goal_met(world) and not goal_abort(world):
         _progress(

@@ -6,6 +6,7 @@ function runnerShell(opts) {
     currentView: opts.defaultView || "channels",
     viewingTurn: opts.viewingTurn != null ? opts.viewingTurn : null,
     liveTurn: curTurn,
+    inspectorOpen: false,
     get isReplay() {
       return this.viewingTurn != null && this.viewingTurn !== this.liveTurn;
     },

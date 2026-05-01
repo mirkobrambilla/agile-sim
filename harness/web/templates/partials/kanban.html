@@ -1,15 +1,78 @@
 <div class="flex flex-col gap-4">
   <h2 class="text-lg font-semibold">Kanban</h2>
   <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn if effective_turn is not none else 'latest' }}</p>
+  {% if team_members %}
+  <div class="flex flex-col gap-2 panel panel-section">
+    <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)]">Load by person</h3>
+    {% for tid, members in team_members.items() %}
+    <div class="flex flex-col gap-2">
+      <span class="text-xs font-mono text-[var(--color-text-muted)]">team {{ tid }}</span>
+      <div class="flex flex-wrap gap-3">
+        {% for mid in members %}
+        {% set mx = (char_meta or {}).get(mid, {}) %}
+        {% set wdone = columns['done']|selectattr('owner_id', 'equalto', mid)|list|length %}
+        {% set wtotal = columns['backlog']|list|length + columns['doing']|list|length + columns['done']|list|length + columns['parked']|list|length %}
+        {% set ratio = (100 * wdone // (wtotal or 1)) %}
+        <div class="kanban-person-head flex-1 min-w-[140px]">
+          {% set sv = sprite_url(sprite_set, 'idle') %}
+          {% if sv %}
+          <button type="button" class="sprite sprite--from-asset w-8 h-8 border-0 cursor-pointer p-0 shrink-0" style="background-image: url('{{ sv }}')"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ mid)|urlencode }}&turn={{ effective_turn }}"
+            hx-target="#center-stage" hx-swap="innerHTML"></button>
+          {% else %}
+          <button type="button" class="sprite sprite--idle w-8 h-8 text-[0.45rem] cursor-pointer shrink-0"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ mid)|urlencode }}&turn={{ effective_turn }}"
+            hx-target="#center-stage" hx-swap="innerHTML">{{ (mid[:2])|upper }}</button>
+          {% endif %}
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-semibold truncate">{{ mx.get('name', mid) }}</div>
+            <div class="kanban-loadbar mt-1">
+              <div class="kanban-loadbar__fill" style="width: {{ ratio }}%;"></div>
+            </div>
+            <div class="text-[0.65rem] text-[var(--color-text-muted)]">done {{ wdone }} · est. load</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
     {% for col_name, title in [('backlog','Backlog'), ('doing','Doing'), ('done','Done'), ('parked','Parked')] %}
     <div class="kanban-col panel panel-section min-h-[120px]">
-      <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-3">{{ title }}</h3>
+      <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-3">{{ title }} · {{ columns[col_name]|length }}</h3>
       <div class="flex flex-col gap-2">
         {% for wi in columns[col_name] %}
+        {% set oid = wi.get('owner_id') or wi.get('owner', '') %}
+        {% set om = (char_meta or {}).get(oid, {}) %}
+        {% set och = (snap_world.get('characters') or {}).get(oid, {}) if snap_world else {} %}
+        {% set oexpr = expression_from_vitals(och.get('vitals') or {}) %}
+        {% set sv = sprite_url(sprite_set, oexpr) %}
         <div class="kanban-card">
-          <div class="font-medium">{{ wi.get('title','(untitled)') }}</div>
-          <div class="kanban-card__owner">owner: {{ wi.get('owner','—') }}</div>
+          <div class="flex justify-between gap-2 items-start">
+            <span class="font-medium">{{ wi.get('title','(untitled)') }}</span>
+            <button
+              type="button"
+              class="text-xs text-[var(--color-accent)] hover:underline shrink-0"
+              hx-get="/partials/run/{{ bundle.url_path }}/inspector/work_item/{{ wi.id|urlencode }}?turn={{ effective_turn }}"
+              hx-target="#inspector-body"
+              hx-swap="innerHTML"
+              @click="inspectorOpen = true"
+            >i</button>
+          </div>
+          <div class="kanban-card__owner flex items-center gap-2 mt-2">
+            {% if sv %}
+            <button type="button" class="sprite sprite--from-asset w-6 h-6 shrink-0 border-0 cursor-pointer p-0" style="background-image: url('{{ sv }}')" title="{{ oid }}"
+              hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ oid)|urlencode }}&turn={{ effective_turn }}"
+              hx-target="#center-stage" hx-swap="innerHTML"></button>
+            {% else %}
+            <button type="button" class="sprite sprite--idle w-6 h-6 text-[0.35rem] shrink-0 cursor-pointer" title="{{ oid }}"
+              hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ oid)|urlencode }}&turn={{ effective_turn }}"
+              hx-target="#center-stage" hx-swap="innerHTML">{{ (oid[:2] or '?')|upper }}</button>
+            {% endif %}
+            <span>{{ om.get('name', oid) }}</span>
+          </div>
         </div>
         {% else %}
         <p class="text-xs text-[var(--color-text-muted)]">—</p>

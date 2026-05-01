@@ -1,0 +1,43 @@
+# Generated UI assets. Paths are relative to repo root unless absolute.
+# Tune prompts here, then: agile-harness assets generate [--item SET/id] [--force]
+# Outputs go under harness/web/static/ (gitignored PNGs; this file is committed).
+
+defaults:
+  model: google/gemini-3.1-flash-image-preview
+  aspect_ratio: "1:1"
+  out_root: harness/web/static/sprites
+
+sets:
+  - id: default
+    style: >-
+      JRPG pixel-art portrait bust, 64x64 feel, centered face, soft studio lighting,
+      transparent background, limited palette, crisp pixels, game UI avatar,
+      no text, no watermark
+    items:
+      - id: idle
+        prompt: "{style}. Expression: calm neutral, slight relaxed smile, eyes open."
+      - id: happy
+        prompt: "{style}. Expression: bright genuine smile, eyes slightly closed with joy."
+      - id: frustrated
+        prompt: "{style}. Expression: furrowed brow, tight mouth, mild annoyance."
+      - id: overloaded
+        prompt: "{style}. Expression: stressed, wide eyes, sweat drop vibe, overwhelmed."
+      - id: bored
+        prompt: "{style}. Expression: half-lidded eyes, flat mouth, uninterested."
+      - id: surprised
+        prompt: "{style}. Expression: raised brows, small o-shaped mouth, alert."
+      - id: proud
+        prompt: "{style}. Expression: confident slight smirk, chin up, satisfied."
+      - id: sad
+        prompt: "{style}. Expression: downcast eyes, subtle frown, subdued."
+
+  - id: covers
+    model: google/gemini-3.1-flash-image-preview
+    aspect_ratio: "16:9"
+    out_root: harness/web/static/covers
+    items:
+      - id: priority-conflict-coaching
+        prompt: >-
+          Wide banner, vintage early-2000s business chat app aesthetic (cool blue grey chrome),
+          JRPG warm accent colours, abstract silhouettes of engineers in conflict resolving priorities,
+          no text, no logos, dramatic but professional

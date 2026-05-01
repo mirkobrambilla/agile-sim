@@ -1,17 +1,74 @@
-<div class="flex flex-col gap-4 max-w-3xl" x-data="channelView({})">
+<div class="flex flex-col gap-4 max-w-3xl">
   <div class="flex items-center justify-between gap-2">
-    <h2 class="text-lg font-semibold">{{ channel }}</h2>
-    <span class="chip">read-only replay</span>
+    <h2 class="text-lg font-semibold font-[family-name:var(--font-mono)]">{{ channel }}</h2>
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="text-xs text-[var(--color-accent)] hover:underline"
+        hx-get="/partials/run/{{ bundle.url_path }}/inspector/channel?channel={{ channel|urlencode }}&turn={{ effective_turn }}"
+        hx-target="#inspector-body"
+        hx-swap="innerHTML"
+        @click="inspectorOpen = true"
+      >Inspect channel</button>
+      {% if live_session %}
+      <span class="chip">live</span>
+      {% else %}
+      <span class="chip">read-only replay</span>
+      {% endif %}
+    </div>
   </div>
   <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn if effective_turn is not none else '—' }} · Messages: {{ messages|length }}</p>
   <div class="flex flex-col gap-3">
     {% for m in messages %}
+    {% set meta = char_meta.get(m.author) or char_meta.get(m.author|lower) %}
+    {% set disp = meta.name if meta else m.author %}
+    {% set handle = meta.handle if meta else ('@' ~ m.author) %}
+    {% if m.author|lower == 'coach' %}
+      {% set expr = 'proud' %}
+    {% else %}
+      {% set chsnap = (snap_world.get('characters') or {}).get(m.author, {}) if snap_world else {} %}
+      {% set expr = expression_from_vitals(chsnap.get('vitals') or {}) %}
+    {% endif %}
+    {% set surl = sprite_url(sprite_set, expr) %}
     <article class="msg {% if m.author|lower == 'coach' %}msg--coach{% endif %}">
-      <div class="flex gap-2 items-start">
-        <div class="sprite sprite--idle shrink-0" aria-hidden="true">{{ (m.author[:2] or '?')|upper }}</div>
+      <div class="msg__row">
+        {% if m.author|lower != 'coach' %}
+          {% if surl %}
+          <button
+            type="button"
+            class="sprite sprite--from-asset shrink-0 w-10 h-10 border-0 cursor-pointer p-0"
+            style="background-image: url('{{ surl }}')"
+            title="Open DM"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ m.author)|urlencode }}&turn={{ effective_turn }}"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            aria-label="Open DM with {{ m.author }}"
+          ></button>
+          {% else %}
+          <button
+            type="button"
+            class="sprite sprite--idle shrink-0 cursor-pointer"
+            title="Open DM"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ m.author)|urlencode }}&turn={{ effective_turn }}"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+          >{{ (m.author[:2] or '?')|upper }}</button>
+          {% endif %}
+        {% else %}
+          <div class="sprite sprite--from-asset shrink-0 w-10 h-10 flex items-center justify-center text-[0.5rem] font-[family-name:var(--font-pixel)] bg-[var(--color-accent-warm)] text-white border-0" aria-hidden="true">C</div>
+        {% endif %}
         <div class="min-w-0 flex-1">
-          <div class="msg__author">{{ m.author }} · T{{ m.turn }}</div>
+          <div class="msg__meta">
+            <span class="font-semibold text-[var(--color-text)]">{{ disp }}</span>
+            <span class="msg__handle">{{ handle }}</span>
+            <span>· T{{ m.turn }}</span>
+          </div>
           <div class="msg__body">{{ m.content }}</div>
+          <div class="msg__reactions" aria-hidden="true">
+            <span class="msg__react-slot"></span>
+            <span class="msg__react-slot"></span>
+            <span class="msg__react-slot"></span>
+          </div>
         </div>
       </div>
     </article>
@@ -19,4 +76,19 @@
     <p class="text-[var(--color-text-muted)] text-sm">No messages in this channel.</p>
     {% endfor %}
   </div>
+  {% if live_session and session_coach_mode == 'human' %}
+  <form
+    class="flex flex-col gap-2 border-t border-[var(--color-border)] pt-3 mt-2"
+    hx-post="/runs/{{ bundle.url_path }}/coach/post"
+    hx-target="#center-stage"
+    hx-swap="innerHTML"
+  >
+    <input type="hidden" name="channel" value="{{ channel }}" />
+    <label class="text-xs font-semibold text-[var(--color-text-muted)]">Coach message (human mode)</label>
+    <textarea name="content" rows="2" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" placeholder="Post as coach…"></textarea>
+    <button type="submit" class="btn btn-primary text-sm self-start">Send</button>
+  </form>
+  {% elif live_session %}
+  <p class="text-xs text-[var(--color-text-muted)] border-t border-[var(--color-border)] pt-3">Coach is not in human mode; message input disabled.</p>
+  {% endif %}
 </div>

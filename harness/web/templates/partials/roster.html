@@ -1,0 +1,47 @@
+<div class="flex flex-col gap-4 max-w-4xl">
+  <div class="flex items-center justify-between gap-2">
+    <h2 class="text-lg font-semibold">Roster</h2>
+    <span class="chip">Turn {{ effective_turn }}</span>
+  </div>
+  <p class="text-xs text-[var(--color-text-muted)]">Expression class from vitals; click a face for DM (same as vitals rail).</p>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    {% for cid, ch in characters.items() %}
+    {% set v = (ch.get('vitals') or {}) %}
+    {% set expr = expression_from_vitals(v) %}
+    {% set surl = sprite_url(sprite_set, expr) %}
+    {% set meta = (char_meta or {}).get(cid, {}) %}
+    <div class="panel panel-section flex flex-col items-center gap-2 p-3">
+      {% if surl %}
+      <button
+        type="button"
+        class="sprite sprite--from-asset w-16 h-16 border-0 cursor-pointer p-0"
+        style="background-image: url('{{ surl }}')"
+        hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
+        hx-target="#center-stage"
+        hx-swap="innerHTML"
+      ></button>
+      {% else %}
+      <button
+        type="button"
+        class="sprite sprite--idle w-16 h-16 cursor-pointer"
+        hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
+        hx-target="#center-stage"
+        hx-swap="innerHTML"
+      >{{ (cid[:2])|upper }}</button>
+      {% endif %}
+      <div class="text-center text-sm font-semibold">{{ meta.get('name', cid) }}</div>
+      <div class="text-[0.65rem] text-[var(--color-text-muted)] font-mono">{{ expr }}</div>
+      <button
+        type="button"
+        class="text-xs text-[var(--color-accent)] hover:underline"
+        hx-get="/partials/run/{{ bundle.url_path }}/inspector/character/{{ cid|urlencode }}?turn={{ effective_turn }}"
+        hx-target="#inspector-body"
+        hx-swap="innerHTML"
+        @click="inspectorOpen = true"
+      >Inspect</button>
+    </div>
+    {% else %}
+    <p class="text-[var(--color-text-muted)] text-sm">No characters in this turn snapshot.</p>
+    {% endfor %}
+  </div>
+</div>

@@ -6,7 +6,7 @@ The simulation is driven by AI (via OpenRouter) representing **characters** in a
 
 ## Status
 
-**Harness + read-only web UI** — The CLI loop lives under [`harness/`](harness/); a FastAPI app under [`harness/web/`](harness/web/) can browse finished runs and batch folders. Build CSS once (`./scripts/build_css.sh`), then `agile-harness serve` and open the printed URLs (or `agile-harness view runs/<id>`). See [`docs/web-conventions.md`](docs/web-conventions.md).
+**Harness + web UI** — The CLI loop lives under [`harness/`](harness/); a FastAPI app under [`harness/web/`](harness/web/) browses finished runs, supports interactive read mode (inspector, roster, timeline scrub), and can start **live** step-by-step runs from `/new` when `secrets.yaml` is present. Sprite pipeline: [`docs/assets.md`](docs/assets.md). Build CSS once (`./scripts/build_css.sh`), then `agile-harness serve` and open the printed URLs (or `agile-harness view runs/<id>`). See [`docs/web-conventions.md`](docs/web-conventions.md).
 
 See [`docs/concept.md`](docs/concept.md) for the problem definition, and [`docs/requirements.md`](docs/requirements.md) and [`docs/architecture.md`](docs/architecture.md) for scope and design.
 
