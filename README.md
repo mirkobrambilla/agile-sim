@@ -12,7 +12,14 @@ See [`docs/concept.md`](docs/concept.md) for the problem definition, and [`docs/
 
 ## Harness (CLI)
 
-Requirements: Python 3.11+, `secrets.yaml` in the repo root with `openrouter_api_key`.
+Requirements: Python 3.11+, and a repo-root **`secrets.yaml`** with `openrouter_api_key` (OpenRouter).
+
+Copy the example and edit:
+
+```bash
+cp secrets.example.yaml secrets.yaml
+# Edit secrets.yaml — see comments inside secrets.example.yaml
+```
 
 ```bash
 cd agile-sim
