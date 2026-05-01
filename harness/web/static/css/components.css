@@ -1,0 +1,204 @@
+@layer components {
+  .panel {
+    background-color: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .panel-section {
+    padding: var(--space-4);
+  }
+
+  .picker-card.panel:hover {
+    border-color: var(--color-accent);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    background-color: var(--color-bg-app);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+  .btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .btn-primary {
+    background-color: var(--color-accent);
+    color: #fff;
+  }
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-accent);
+    border-color: var(--color-border);
+    background-color: var(--color-bg-panel);
+  }
+
+  .stoplight {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .stoplight--ok {
+    color: var(--color-ok);
+  }
+  .stoplight--warn {
+    color: var(--color-warn);
+  }
+  .stoplight--fail {
+    color: var(--color-fail);
+  }
+
+  .vital-bar {
+    height: 0.5rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-border);
+    overflow: hidden;
+  }
+  .vital-bar__fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-accent);
+    transition: width 0.2s ease;
+  }
+  .vital-bar__fill--low {
+    width: 15%;
+  }
+  .vital-bar__fill--mid {
+    width: 40%;
+  }
+  .vital-bar__fill--high {
+    width: 65%;
+  }
+  .vital-bar__fill--max {
+    width: 90%;
+  }
+
+  .prose-run :is(h1, h2, h3) {
+    font-weight: 600;
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-2);
+  }
+  .prose-run pre {
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    background: var(--color-bg-app);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+  }
+
+  .msg {
+    border-left: 3px solid var(--color-border);
+    padding-left: var(--space-3);
+  }
+  .msg__author {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
+  }
+  .msg__body {
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .msg--coach {
+    border-left-color: var(--color-accent-warm);
+    background-color: rgba(58, 110, 165, 0.04);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+  }
+
+  .kanban-col {
+    min-width: 0;
+  }
+  .kanban-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+    background: var(--color-bg-panel);
+    margin-bottom: var(--space-2);
+    font-size: 0.875rem;
+  }
+  .kanban-card__owner {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-2);
+  }
+
+  .topbar {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-panel);
+  }
+  .app-rail {
+    border-right: 1px solid var(--color-border);
+    background: var(--color-bg-panel);
+  }
+  .left-rail {
+    border-right: 1px solid var(--color-border);
+    background: var(--color-bg-app);
+  }
+  .right-rail {
+    border-left: 1px solid var(--color-border);
+    background: var(--color-bg-app);
+  }
+
+  .sprite {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-family: var(--font-pixel);
+    color: var(--color-text);
+  }
+  .sprite--idle {
+    background-color: var(--mood-idle);
+  }
+  .sprite--overloaded {
+    background-color: var(--mood-overloaded);
+  }
+  .sprite--frustrated {
+    background-color: var(--mood-frustrated);
+  }
+  .sprite--bored {
+    background-color: var(--mood-bored);
+  }
+  .sprite--proud {
+    background-color: var(--mood-proud);
+  }
+
+  .banner-replay {
+    background: var(--color-accent-gold);
+    color: var(--color-text);
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}

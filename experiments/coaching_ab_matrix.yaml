@@ -1,0 +1,29 @@
+# A/B matrix: same scenario, compare coach modes and swappable preset advice.
+# Run from repo root:
+#   agile-harness matrix experiments/coaching_ab_matrix.yaml --scenario scenarios/two-teams-shared-staging
+# Or rely on scenario_dir below (relative to this file).
+
+scenario_dir: ../scenarios/two-teams-shared-staging
+runs_per_variant: 1
+concurrency: 2
+seed_base: 5000
+
+variants:
+  - name: no_coach
+    agent_model: google/gemini-3-flash-preview
+    coach_mode: none
+
+  - name: preset_agile_light
+    agent_model: google/gemini-3-flash-preview
+    coach_mode: preset
+    coach_preset: ../scenarios/two-teams-shared-staging/coach_presets/agile_light.yaml
+
+  - name: preset_firm_fairness
+    agent_model: google/gemini-3-flash-preview
+    coach_mode: preset
+    coach_preset: ../scenarios/two-teams-shared-staging/coach_presets/firm_fairness.yaml
+
+  # Uncomment to compare LLM coach (same model as agents):
+  # - name: llm_coach
+  #   agent_model: google/gemini-3-flash-preview
+  #   coach_mode: llm

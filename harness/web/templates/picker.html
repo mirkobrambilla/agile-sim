@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Runs — agile-sim{% endblock %}
+{% block body %}
+<header class="topbar sticky top-0 z-10">
+  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-4xl mx-auto">
+    <div>
+      <h1 class="text-lg font-bold">Runs</h1>
+      <p class="text-xs text-[var(--color-text-muted)] mt-1">Open a finished batch or single run. Newest first.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="/experiments" class="btn btn-ghost text-sm">Experiments table</a>
+      <p class="text-xs text-[var(--color-text-muted)]"><code class="font-[family-name:var(--font-mono)]">{{ runs_dir }}</code></p>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-6">
+  {% if picker_items %}
+  <ul class="flex flex-col gap-3 list-none p-0 m-0">
+    {% for it in picker_items %}
+    <li>
+      <a
+        href="{{ it.href }}"
+        class="picker-card panel block overflow-hidden no-underline text-[var(--color-text)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+      >
+        <div class="panel-section flex flex-wrap items-start justify-between gap-3">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="font-semibold font-[family-name:var(--font-mono)] text-sm break-all">{{ it.title }}</span>
+              <span class="chip shrink-0">{{ it.kind_label }}</span>
+            </div>
+            <p class="text-sm text-[var(--color-text)] mb-1">{{ it.scenario }}</p>
+            <p class="text-xs text-[var(--color-text-muted)]">{{ it.sub }}</p>
+          </div>
+          <time class="text-xs text-[var(--color-text-muted)] shrink-0 whitespace-nowrap">{{ it.date }}</time>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="text-[var(--color-text-muted)]">
+    No finished runs yet. Folders need <code>summary.json</code> (single runs) or <code>manifest.json</code> (batches) under <code>{{ runs_dir }}</code>.
+  </p>
+  {% endif %}
+</main>
+{% endblock %}

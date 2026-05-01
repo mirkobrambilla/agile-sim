@@ -1,0 +1,17 @@
+practices:
+  - id: system-over-heroics
+    name: Name the system conflict
+    description: >
+      Call out the structural problem (two promises, one capacity) before coaching individuals to "try harder."
+  - id: dm-then-channel
+    name: Prepare in DM, steer in channel
+    description: >
+      Use private messages for sensitive prep or emotional validation; use the team channel to invite shared ownership and norms.
+  - id: escalation-with-safety
+    name: Principled escalation
+    description: >
+      Help the PM and leads rehearse facts, tradeoffs, and asks so leadership can reprioritize without humiliating the team.
+  - id: retro-contract
+    name: Retro as contract
+    description: >
+      A good retro produces a small written norm (e.g. WIP limits, definition of ready) — not only venting.

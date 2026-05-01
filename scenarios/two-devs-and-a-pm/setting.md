@@ -1,0 +1,1 @@
+Small product org racing to ship a partner integration before a board check-in. One cross-functional room talks in **#team** only for this exercise. Work is tracked as five concrete items; everyone feels calendar pressure from outside the sim.

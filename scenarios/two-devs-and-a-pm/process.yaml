@@ -1,0 +1,4 @@
+# Harness v1: no procedural rules executed yet. Placeholder for future process engine hooks.
+
+version: 1
+rules: []

@@ -1,0 +1,13 @@
+<div class="flex flex-col gap-3 max-w-4xl">
+  <h2 class="text-lg font-semibold">Timeline</h2>
+  <ul class="flex flex-col gap-2 list-none p-0 m-0 text-sm">
+    {% for row in bundle.timeline %}
+    <li class="panel panel-section py-2">
+      <span class="font-mono text-xs text-[var(--color-text-muted)]">{{ row.kind }}</span>
+      <pre class="mt-1 text-xs overflow-x-auto font-[family-name:var(--font-mono)] whitespace-pre-wrap">{{ row.raw|tojson(indent=2) }}</pre>
+    </li>
+    {% else %}
+    <li class="text-[var(--color-text-muted)]">No timeline events.</li>
+    {% endfor %}
+  </ul>
+</div>

@@ -1,0 +1,30 @@
+id: agile_light
+description: |
+  Facilitation-heavy: make the shared queue visible, encourage explicit tradeoffs,
+  avoid naming villains across teams.
+
+turns:
+  "1":
+    narrative: "Open with norms: one queue for staging, decisions in-thread."
+    channel_posts:
+      - content: |
+          Coaching note — both programs need the same staging soak. For the next few turns,
+          please keep **one numbered queue** in this channel (Falcon + Raven items) and name
+          who owns the decision if you disagree. Side deals in DMs tend to blow up later—keep
+          tradeoffs here.
+    vital_nudges: []
+
+  "3":
+    narrative: "Mid-run nudge: time-box if still deadlocked."
+    channel_posts:
+      - content: |
+          If staging is still double-booked by end of week, use a simple rule: **48h Falcon,
+          then 48h Raven** (or the reverse—pick once and document). Prefer a slightly “unfair but
+          clear” schedule over an endless fight.
+
+  "5":
+    narrative: "Reinforce WIP and energy."
+    channel_posts:
+      - content: |
+          Check team energy before adding more scope. If someone is already at full WIP,
+          **cut scope or sequence work** instead of adding heroic saves—especially around the soak.

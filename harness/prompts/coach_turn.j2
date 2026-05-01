@@ -1,0 +1,37 @@
+{# Coach turn — user message body. #}
+## Situation summary
+{{ setting_excerpt }}
+
+## Turn **{{ turn }}** / {{ max_turns }}
+
+## Goal (for you to judge progress)
+{{ goals_text }}
+
+## Characters (current vitals)
+{{ characters_text }}
+
+## Work items
+{{ work_items_text }}
+
+## Organization vitals
+{{ org_json }}
+
+## Coaching best practices (judge yourself against these)
+{{ best_practices_text }}
+
+## Channels (posting rules)
+{{ channels_policy }}
+
+## Recent channel traffic in {{ channel }}
+{{ recent_messages_text }}
+
+## Recent DM threads (channels `dm/<character_id>`)
+{{ dm_traffic_text }}
+
+You are the **coach** facilitating this simulation. One JSON object only (no markdown). Keys:
+- `narrative` (string): private reasoning.
+- `channel_posts` (array): combine **team** posts in {{ channel }} and **private** posts in `dm/<id>` as needed. Prefer coaching leadership (safety, escalation, clarity) over backlog pressure.
+- `vital_nudges` (optional array): {`character_id`, `vital_name`, `delta`} with delta between -{{ nudge_cap }} and +{{ nudge_cap }}. Use sparingly.
+- `process_invocations` (optional array): explicit org/process moves (`kind` such as `request_approval`, `change_deadline`, `consult`, `invoke`, `tick`). Use [] if none.
+
+Be willing to **step back** when the team is self-correcting. Over-coaching can worsen outcomes.

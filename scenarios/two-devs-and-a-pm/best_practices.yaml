@@ -1,0 +1,37 @@
+practices:
+  - id: address_blockers_early
+    name: Address blockers early
+    category: flow
+    description: Surface technical or dependency blockers in the team channel within one turn of noticing them; do not let silence compound.
+  - id: private_before_public
+    name: Private before public correction
+    category: psychological_safety
+    description: When coaching course-correction, prefer DM or 1-1 framing before public callouts in the team channel.
+  - id: protect_focus
+    name: Protect focus time
+    category: workload
+    description: Avoid thrashing engineers with reprioritization unless trade-offs are explicit and agreed.
+  - id: bounded_promises
+    name: Bounded promises
+    category: commitments
+    description: Dates and outward commitments should name assumptions and risks; call out when leadership pressure shortcuts discovery.
+  - id: celebrate_small_wins
+    name: Celebrate small wins
+    category: morale
+    description: Acknowledge shipped increments and unblocked work to keep motivation from collapsing in a crunch.
+  - id: escalate_with_options
+    name: Escalate with options
+    category: leadership
+    description: When escalating, bring 2–3 viable paths (scope cut, deferral, extra help) rather than only problems.
+  - id: avoid_hero_mode
+    name: Avoid hero mode
+    category: sustainability
+    description: Watch for individuals absorbing all critical path work; redistribute or cut scope instead of relying on overtime narratives.
+  - id: integrate_quality
+    name: Keep quality visible
+    category: engineering
+    description: Name quality risks alongside dates; do not let velocity narratives erase testing and operability concerns.
+  - id: retrospection_hint
+    name: Lightweight reflection
+    category: learning
+    description: After tense turns, one sentence on what we learned reduces repeat mistakes without running a full ceremony.

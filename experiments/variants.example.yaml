@@ -1,0 +1,15 @@
+# Example matrix for `agile-harness matrix experiments/variants.example.yaml`
+# Duplicate and edit models for your OpenRouter account.
+
+scenario_dir: scenarios/two-devs-and-a-pm
+runs_per_variant: 2
+concurrency: 2
+seed_base: 2000
+
+variants:
+  - name: gpt4o_mini_baseline
+    agent_model: google/gemini-3-flash-preview
+    coach_model: google/gemini-3-flash-preview
+  # - name: other_model
+  #   agent_model: anthropic/claude-4.6-sonnet
+  #   coach_model: anthropic/claude-4.6-sonnet

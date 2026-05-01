@@ -1,0 +1,19 @@
+# Matrix: leadership / priority scenario — compare coach modes
+# Run (matrix + parse + LLM comparison in one command):
+#   agile-harness experiment experiments/priority_coach_matrix.yaml -v
+# Add per-run coaching critique (more API cost):
+#   agile-harness experiment experiments/priority_coach_matrix.yaml --with-judge -v
+
+scenario_dir: ../scenarios/priority-conflict-coaching
+runs_per_variant: 10
+concurrency: 5
+seed_base: 7100
+
+variants:
+  - name: no_coach
+    agent_model: google/gemini-3-flash-preview
+    coach_mode: none
+
+  - name: llm_coach
+    agent_model: google/gemini-3-flash-preview
+    coach_mode: llm

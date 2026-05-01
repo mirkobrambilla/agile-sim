@@ -1,0 +1,22 @@
+<div class="flex flex-col gap-4 max-w-3xl" x-data="channelView({})">
+  <div class="flex items-center justify-between gap-2">
+    <h2 class="text-lg font-semibold">{{ channel }}</h2>
+    <span class="chip">read-only replay</span>
+  </div>
+  <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn if effective_turn is not none else '—' }} · Messages: {{ messages|length }}</p>
+  <div class="flex flex-col gap-3">
+    {% for m in messages %}
+    <article class="msg {% if m.author|lower == 'coach' %}msg--coach{% endif %}">
+      <div class="flex gap-2 items-start">
+        <div class="sprite sprite--idle shrink-0" aria-hidden="true">{{ (m.author[:2] or '?')|upper }}</div>
+        <div class="min-w-0 flex-1">
+          <div class="msg__author">{{ m.author }} · T{{ m.turn }}</div>
+          <div class="msg__body">{{ m.content }}</div>
+        </div>
+      </div>
+    </article>
+    {% else %}
+    <p class="text-[var(--color-text-muted)] text-sm">No messages in this channel.</p>
+    {% endfor %}
+  </div>
+</div>

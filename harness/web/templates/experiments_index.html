@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Experiments — agile-sim{% endblock %}
+{% block body %}
+<header class="topbar sticky top-0 z-10">
+  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-6xl mx-auto">
+    <h1 class="text-lg font-bold">Experiments</h1>
+    <a href="/" class="btn btn-ghost text-sm">← Run list</a>
+  </div>
+</header>
+<main class="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4">
+  {% if not batches %}
+  <p class="text-[var(--color-text-muted)]">No batch directories with <code>manifest.json</code>.</p>
+  {% endif %}
+  {% for row in batches %}
+  <article class="panel overflow-hidden">
+    <div class="panel-section flex flex-wrap items-center justify-between gap-2">
+      <a href="/experiments/{{ row.name }}" class="font-semibold text-[var(--color-accent)]">{{ row.name }}</a>
+      {% if row.metrics %}
+      <span class="chip">{{ row.metrics.n_runs_with_summary }} runs</span>
+      {% endif %}
+    </div>
+    {% if row.metrics and row.metrics.variants %}
+    <div class="panel-section border-t border-[var(--color-border)] overflow-x-auto">
+      <table class="min-w-full text-sm border-collapse">
+        <thead>
+          <tr class="text-left text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+            <th class="py-2 pr-4">Variant</th>
+            <th class="py-2 pr-4">n</th>
+            <th class="py-2 pr-4">Goal rate</th>
+            <th class="py-2 pr-4">Stress abort</th>
+            <th class="py-2 pr-4">Mean cost</th>
+            <th class="py-2">Mean judge</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in row.metrics.variants %}
+          <tr class="border-b border-[var(--color-border)]">
+            <td class="py-2 pr-4 font-medium">{{ v.name }}</td>
+            <td class="py-2 pr-4">{{ v.n_runs }}</td>
+            <td class="py-2 pr-4">{{ '%.0f'|format(v.goal_rate * 100) }}%</td>
+            <td class="py-2 pr-4">{{ '%.0f'|format(v.stress_abort_rate * 100) }}%</td>
+            <td class="py-2 pr-4">{{ '%.4f'|format(v.mean_cost_usd) }}</td>
+            <td class="py-2 pr-4">
+              {% if v.mean_judge_score is defined and v.mean_judge_score is not none %}
+              {{ '%.2f'|format(v.mean_judge_score) }}
+              {% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</main>
+{% endblock %}

@@ -1,0 +1,1 @@
+Alex Nguyen — Falcon **tech lead**. Protective of the team's commitments, quick to spot when Raven's asks threaten Falcon's board narrative. Will negotiate hard for the staging window; can sound sharp under pressure.

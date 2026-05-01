@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ batch_id }} — experiment{% endblock %}
+{% block body %}
+<header class="topbar sticky top-0 z-10">
+  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-6xl mx-auto">
+    <div class="flex flex-col gap-1">
+      <a href="/experiments" class="text-xs text-[var(--color-text-muted)] hover:underline">← Experiments</a>
+      <h1 class="text-lg font-bold">{{ batch_id }}</h1>
+    </div>
+    <a href="/" class="btn btn-ghost text-sm">← Run list</a>
+  </div>
+</header>
+<main class="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-6">
+  {% if metrics and metrics.variants %}
+  <section class="panel overflow-hidden">
+    <h2 class="panel-section text-base font-semibold border-b border-[var(--color-border)]">Variants</h2>
+    <div class="panel-section overflow-x-auto">
+      <table class="min-w-full text-sm border-collapse">
+        <thead>
+          <tr class="text-left text-[var(--color-text-muted)] border-b border-[var(--color-border)]">
+            <th class="py-2 pr-4">Variant</th>
+            <th class="py-2 pr-4">n</th>
+            <th class="py-2 pr-4">Goal rate</th>
+            <th class="py-2 pr-4">Stress</th>
+            <th class="py-2 pr-4">Mean cost</th>
+            <th class="py-2 pr-4">Mean judge</th>
+            <th class="py-2">Open run</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in metrics.variants %}
+          {% for run in v.runs %}
+          <tr class="border-b border-[var(--color-border)]">
+            {% if loop.first %}
+            <td class="py-2 pr-4 font-medium align-top" rowspan="{{ v.runs|length }}">{{ v.name }}</td>
+            <td class="py-2 pr-4 align-top" rowspan="{{ v.runs|length }}">{{ v.n_runs }}</td>
+            <td class="py-2 pr-4 align-top" rowspan="{{ v.runs|length }}">{{ '%.0f'|format(v.goal_rate * 100) }}%</td>
+            <td class="py-2 pr-4 align-top" rowspan="{{ v.runs|length }}">{{ '%.0f'|format(v.stress_abort_rate * 100) }}%</td>
+            <td class="py-2 pr-4 align-top" rowspan="{{ v.runs|length }}">{{ '%.4f'|format(v.mean_cost_usd) }}</td>
+            <td class="py-2 pr-4 align-top" rowspan="{{ v.runs|length }}">
+              {% if v.mean_judge_score is defined and v.mean_judge_score is not none %}
+              {{ '%.2f'|format(v.mean_judge_score) }}
+              {% else %}—{% endif %}
+            </td>
+            {% endif %}
+            <td class="py-2">
+              <a class="text-[var(--color-accent)] font-medium hover:underline" href="/runs/{{ batch_id }}/{{ run.path }}">Mission control</a>
+              {% if run.judge_score is defined and run.judge_score is not none %}
+              <span class="chip ml-2">judge {{ '%.1f'|format(run.judge_score) }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+
+  {% if comparison_html %}
+  <section class="panel overflow-hidden">
+    <h2 class="panel-section text-base font-semibold border-b border-[var(--color-border)]">Comparison</h2>
+    <div class="panel-section prose-run max-w-none text-sm">{{ comparison_html|safe }}</div>
+  </section>
+  {% endif %}
+
+  {% if report_html %}
+  <section class="panel overflow-hidden">
+    <h2 class="panel-section text-base font-semibold border-b border-[var(--color-border)]">Report</h2>
+    <div class="panel-section prose-run max-w-none text-sm">{{ report_html|safe }}</div>
+  </section>
+  {% endif %}
+
+  {% if judge_html %}
+  <section class="panel overflow-hidden">
+    <h2 class="panel-section text-base font-semibold border-b border-[var(--color-border)]">Judge</h2>
+    <div class="panel-section prose-run max-w-none text-sm">{{ judge_html|safe }}</div>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

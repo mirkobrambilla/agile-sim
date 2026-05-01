@@ -1,0 +1,105 @@
+id: two-teams-shared-staging
+name: Two teams, one staging slot
+version: "1.0"
+
+setting_file: setting.md
+best_practices_file: best_practices.yaml
+
+# Default harness coach: LLM. Override with:
+#   agile-harness run ... --coach-mode none
+#   agile-harness run ... --coach-mode preset --coach-preset scenarios/.../coach_presets/agile_light.yaml
+harness:
+  coach_mode: llm
+
+channels:
+  - id: war_room
+    name: "#war-room"
+    type: open
+    member_ids:
+      - alex
+      - jordan
+      - sam
+      - riley
+
+teams:
+  - id: falcon
+    name: Team Falcon (Partner Alpha program)
+    member_ids:
+      - alex
+      - jordan
+  - id: raven
+    name: Team Raven (Reg renewal program)
+    member_ids:
+      - sam
+      - riley
+
+characters:
+  - id: alex
+    name: Alex Nguyen
+    role: Tech lead (Falcon)
+    markdown_file: characters/alex.md
+    initial_vitals:
+      energy: 68
+      motivation: 72
+      stress: 58
+  - id: jordan
+    name: Jordan Patel
+    role: Engineer (Falcon)
+    markdown_file: characters/jordan.md
+    initial_vitals:
+      energy: 72
+      motivation: 70
+      stress: 52
+  - id: sam
+    name: Sam Okoro
+    role: Tech lead (Raven)
+    markdown_file: characters/sam.md
+    initial_vitals:
+      energy: 70
+      motivation: 74
+      stress: 56
+  - id: riley
+    name: Riley Kim
+    role: Engineer (Raven)
+    markdown_file: characters/riley.md
+    initial_vitals:
+      energy: 74
+      motivation: 71
+      stress: 50
+
+# Each team has three items; everyone wants the shared staging soak.
+work_items:
+  - id: F1
+    title: Falcon KPI dashboard + soak metrics wiring
+    state: doing
+    owner_id: alex
+  - id: F2
+    title: Core API hardening for partner spike traffic
+    state: doing
+    owner_id: jordan
+  - id: F3
+    title: Book shared staging — Falcon 48h soak window (competes with Raven)
+    state: backlog
+    owner_id: alex
+  - id: R1
+    title: Raven compliance evidence pack for auditor
+    state: doing
+    owner_id: sam
+  - id: R2
+    title: Billing edge-case fixes before audit readout
+    state: doing
+    owner_id: riley
+  - id: R3
+    title: Book shared staging — Raven 48h soak window (competes with Falcon)
+    state: backlog
+    owner_id: sam
+
+org_initial_vitals:
+  delivery_progress: 0
+  happiness: 50
+
+goals:
+  max_turns: 12
+  per_team_min_done: 2
+  max_stress_any: 82
+  abort_stress_any: 95

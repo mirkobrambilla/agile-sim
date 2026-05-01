@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Run viewer — agile-sim{% endblock %}
+{% block head %}
+<script src="/static/js/runner-shell.js"></script>
+<script src="/static/js/channel-view.js"></script>
+{% endblock %}
+{% block body %}
+{% set totals = bundle.summary.get('totals') or {} %}
+{% set cost = totals.get('cost') %}
+<div
+  class="flex flex-col min-h-screen"
+  x-data="runnerShell({ liveTurn: {{ effective_turn }}, viewingTurn: {{ effective_turn }}, defaultView: 'channels' })"
+>
+  <header class="topbar shrink-0">
+    <div class="flex flex-wrap items-center gap-4 px-4 py-3">
+      <a href="/" class="text-sm text-[var(--color-text-muted)] hover:underline">← All runs</a>
+      <h1 class="text-base font-bold font-[family-name:var(--font-mono)]">{{ bundle.run_dir.name }}</h1>
+      <label class="flex items-center gap-2 text-sm">
+        <span class="text-[var(--color-text-muted)]">Turn</span>
+        <select
+          class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-1 bg-[var(--color-bg-panel)]"
+          @change="window.location.href = $event.target.value"
+        >
+          {% for t in range(1, max_turn + 1) %}
+          <option value="/runs/{{ bundle.url_path }}/at/{{ t }}" {% if t == effective_turn %}selected{% endif %}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      {% if goal_status == 'ok' %}
+      <span class="stoplight stoplight--ok">On track</span>
+      {% elif goal_status == 'fail' %}
+      <span class="stoplight stoplight--fail">Stress abort</span>
+      {% else %}
+      <span class="stoplight stoplight--warn">Review</span>
+      {% endif %}
+      <span class="chip ml-auto">
+        Cost
+        {% if cost is not none %}
+        ${{ '%.4f'|format(cost) }}
+        {% else %}—{% endif %}
+      </span>
+    </div>
+  </header>
+
+  <div class="flex flex-1 min-h-0">
+    <aside class="app-rail w-12 shrink-0 flex flex-col items-center py-4 gap-3">
+      <a href="/" class="text-lg" title="Home">🏠</a>
+      <span class="text-lg opacity-40" title="Runner">▶</span>
+    </aside>
+
+    <aside class="left-rail w-52 shrink-0 flex flex-col py-4 gap-4 overflow-y-auto">
+      <div>
+        <h2 class="px-3 text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Channels</h2>
+        <nav class="flex flex-col gap-1 px-2">
+          {% for c in bundle.channels %}
+          <button
+            type="button"
+            class="btn btn-ghost justify-start text-left text-sm {% if c.id == channel_query %}border-[var(--color-accent)]{% endif %}"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ c.id|urlencode }}&turn={{ effective_turn }}"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            @click="setView('channels')"
+          >{{ c.label }}</button>
+          {% endfor %}
+        </nav>
+      </div>
+      <div>
+        <h2 class="px-3 text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Views</h2>
+        <nav class="flex flex-col gap-1 px-2">
+          <button
+            type="button"
+            class="btn btn-ghost justify-start text-sm"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ channel_query|urlencode }}&turn={{ effective_turn }}"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            @click="setView('channels')"
+          >Channels</button>
+          <button
+            type="button"
+            class="btn btn-ghost justify-start text-sm"
+            hx-get="/partials/run/{{ bundle.url_path }}/kanban?turn={{ effective_turn }}"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            @click="setView('kanban')"
+          >Kanban</button>
+          <button
+            type="button"
+            class="btn btn-ghost justify-start text-sm"
+            hx-get="/partials/run/{{ bundle.url_path }}/timeline"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            @click="setView('timeline')"
+          >Timeline</button>
+          <button
+            type="button"
+            class="btn btn-ghost justify-start text-sm"
+            hx-get="/partials/run/{{ bundle.url_path }}/summary"
+            hx-target="#center-stage"
+            hx-swap="innerHTML"
+            @click="setView('summary')"
+          >Summary</button>
+        </nav>
+      </div>
+    </aside>
+
+    <div id="center-stage" class="flex-1 min-w-0 overflow-y-auto bg-[var(--color-bg-app)] p-4">
+      {% set channel = channel_query %}
+      {% set messages = bundle.messages_by_channel[channel] if channel in bundle.messages_by_channel else [] %}
+      {% include "partials/channel_view.html" %}
+    </div>
+
+    <aside class="right-rail w-72 shrink-0 flex flex-col gap-4 py-4 px-3 overflow-y-auto border-l border-[var(--color-border)]">
+      <div id="goals-panel">
+        {% include "partials/goals_panel.html" %}
+      </div>
+      <div id="vitals-rail">
+        {% set characters = (snap_world.get('characters') or {}) if snap_world else {} %}
+        {% include "partials/vitals_rail.html" %}
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

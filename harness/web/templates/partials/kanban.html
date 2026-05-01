@@ -1,0 +1,21 @@
+<div class="flex flex-col gap-4">
+  <h2 class="text-lg font-semibold">Kanban</h2>
+  <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn if effective_turn is not none else 'latest' }}</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+    {% for col_name, title in [('backlog','Backlog'), ('doing','Doing'), ('done','Done'), ('parked','Parked')] %}
+    <div class="kanban-col panel panel-section min-h-[120px]">
+      <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-3">{{ title }}</h3>
+      <div class="flex flex-col gap-2">
+        {% for wi in columns[col_name] %}
+        <div class="kanban-card">
+          <div class="font-medium">{{ wi.get('title','(untitled)') }}</div>
+          <div class="kanban-card__owner">owner: {{ wi.get('owner','—') }}</div>
+        </div>
+        {% else %}
+        <p class="text-xs text-[var(--color-text-muted)]">—</p>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

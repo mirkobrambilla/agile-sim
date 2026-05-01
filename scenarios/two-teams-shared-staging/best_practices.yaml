@@ -1,0 +1,13 @@
+practices:
+  - id: make_scarcity_explicit
+    name: Make scarcity explicit
+    category: planning
+    description: Name the shared staging window and decision rights early; avoid implicit queue-jumping.
+  - id: one_queue
+    name: One published queue
+    category: flow
+    description: Maintain a single ordered list for the shared resource rather than parallel side deals.
+  - id: tradeoff_in_thread
+    name: Tradeoffs in the open
+    category: transparency
+    description: When one team wins a slot, state what the other team gains in return or when they get the next slot.

@@ -1,0 +1,32 @@
+<div class="flex flex-col gap-3">
+  <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] tracking-wide">Vitals</h3>
+  <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn if effective_turn is not none else 'latest' }}</p>
+  {% if characters %}
+  <ul class="flex flex-col gap-3 list-none p-0 m-0">
+    {% for cid, ch in characters.items() %}
+    {% set v = (ch.get('vitals') or {}) %}
+    {% set s = (v.get('stress') or 0)|int %}
+    {% set mood_class = 'sprite--idle' %}
+    {% if s > 7 %}{% set mood_class = 'sprite--overloaded' %}
+    {% elif s > 4 %}{% set mood_class = 'sprite--frustrated' %}
+    {% endif %}
+    <li class="panel panel-section flex gap-3 items-center">
+      <div class="sprite {{ mood_class }} shrink-0">{{ (cid[:2])|upper }}</div>
+      <div class="min-w-0 flex-1 text-sm">
+        <div class="font-semibold">{{ cid }}</div>
+        <div class="text-xs text-[var(--color-text-muted)]">
+          E {{ v.get('energy','?') }} · M {{ v.get('motivation','?') }} · S {{ v.get('stress','?') }}
+        </div>
+        <div class="vital-bar mt-2" title="stress level">
+          <div
+            class="vital-bar__fill {% if s <= 2 %}vital-bar__fill--low{% elif s <= 5 %}vital-bar__fill--mid{% elif s <= 8 %}vital-bar__fill--high{% else %}vital-bar__fill--max{% endif %}"
+          ></div>
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="text-xs text-[var(--color-text-muted)]">No character vitals for this turn.</p>
+  {% endif %}
+</div>

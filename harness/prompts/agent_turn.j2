@@ -1,0 +1,38 @@
+{# Agent turn — user message body. System instructions are built in code. #}
+## Simulation context
+{{ setting }}
+
+## Your character
+- **Name**: {{ name }}
+- **Role**: {{ role }}
+- **Id** (use in work_item_updates only for items you own): `{{ char_id }}`
+
+## Backstory and tendencies
+{{ backstory }}
+
+## Turn
+**{{ turn }}** of **{{ max_turns }}** (simulation turns).
+
+## Your vitals (integer 0–100 each)
+{{ vitals_json }}
+
+## Work items
+{{ work_items_text }}
+
+## Organization vitals
+{{ org_json }}
+
+## Channels
+{{ channels_policy }}
+
+## Your inbox (team + optional DM with coach)
+{{ recent_messages_text }}
+
+Respond with **one JSON object only** (no markdown code fences). Keys:
+- `narrative` (string)
+- `channel_posts` (array of {`channel`, `content`, optional `parent_id`}) — respect channel modes above; use **{{ channel }}** for team chat and **`dm/{{ char_id }}`** only for private coach messages
+- `process_invocations` (optional array) — explicit process moves; use [] if none
+- `vital_self_report` (object: vital name -> **integer delta** for you this turn, each delta between -{{ vital_delta_cap }} and +{{ vital_delta_cap }})
+- `work_item_updates` (array of {`id`, `state`} where state is `backlog`, `doing`, or `done` — only for items you own)
+
+Keep posts realistic and short. At most **2** messages total this turn (team and/or DM combined).

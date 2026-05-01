@@ -1,0 +1,11 @@
+<div class="flex flex-col gap-3">
+  <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] tracking-wide">Goals</h3>
+  {% if goal_status == 'ok' %}
+  <p class="stoplight stoplight--ok">Goal satisfied</p>
+  {% elif goal_status == 'fail' %}
+  <p class="stoplight stoplight--fail">Run ended under stress</p>
+  {% else %}
+  <p class="stoplight stoplight--warn">Goal not met</p>
+  {% endif %}
+  <p class="text-xs text-[var(--color-text-muted)]">Read-only snapshot; edit scenario before running new sims.</p>
+</div>

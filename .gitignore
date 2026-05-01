@@ -1,0 +1,16 @@
+secrets.yaml
+node_modules/
+.env
+runs/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.DS_Store
+
+# Tailwind build output (run scripts/build_css.sh)
+harness/web/static/css/app.css
