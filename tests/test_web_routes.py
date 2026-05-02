@@ -8,13 +8,21 @@ from pathlib import Path
 import yaml
 from starlette.testclient import TestClient
 
+from harness.scenario import load_scenario
 from harness.web.app import create_app
+from harness.web.run_session import SESSIONS, RunSession
 
 
 def _seed_run(tmp_path: Path) -> None:
     scen = tmp_path / "scenario.yaml"
     scen.write_text(
-        yaml.safe_dump({"id": "x", "channels": [{"name": "#team"}], "characters": [{"id": "a"}]}),
+        yaml.safe_dump(
+            {
+                "id": "x",
+                "channels": [{"name": "#team"}],
+                "characters": [{"id": "a", "sprite_set": "char_a"}],
+            }
+        ),
         encoding="utf-8",
     )
     run = tmp_path / "run_web"
@@ -90,3 +98,98 @@ def test_picker_home(tmp_path: Path) -> None:
     r = c.get("/")
     assert r.status_code == 200
     assert "run_web" in r.text
+
+
+def test_channel_renders_mention_links(tmp_path: Path) -> None:
+    _seed_run(tmp_path)
+    run = tmp_path / "run_web"
+    (run / "messages.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps({"id": "1", "turn": 1, "author": "a", "channel": "#team", "content": "ping @a please"}),
+                json.dumps({"id": "2", "turn": 1, "author": "a", "channel": "#team", "content": "no link @ghost"}),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    app = create_app(runs_dir=tmp_path)
+    c = TestClient(app)
+    r = c.get("/partials/run/run_web/channel?channel=%23team&turn=1")
+    assert r.status_code == 200
+    assert 'class="msg-mention"' in r.text
+    assert "dm/a" in r.text
+    assert "@ghost" in r.text
+    assert ">@ghost</a>" not in r.text
+
+
+def test_channel_uses_character_sprite_set(tmp_path: Path, monkeypatch) -> None:
+    _seed_run(tmp_path)
+    sprite = tmp_path / "harness" / "web" / "static" / "sprites" / "char_a" / "idle.png"
+    sprite.parent.mkdir(parents=True, exist_ok=True)
+    sprite.write_bytes(b"\x89PNG\r\n\x1a\n")
+    monkeypatch.setattr("harness.web.sprites.repo_root", lambda: tmp_path)
+
+    app = create_app(runs_dir=tmp_path)
+    c = TestClient(app)
+    r = c.get("/partials/run/run_web/channel?channel=%23team&turn=1")
+    assert r.status_code == 200
+    assert "/static/sprites/char_a/idle.png" in r.text
+
+
+def test_scenarios_routes(tmp_path: Path) -> None:
+    repo = Path(__file__).resolve().parents[1]
+    app = create_app(runs_dir=tmp_path)
+    c = TestClient(app)
+    idx = c.get("/scenarios")
+    assert idx.status_code == 200
+    assert "Scenarios" in idx.text
+    one = c.get("/scenarios/two-devs-and-a-pm")
+    assert one.status_code == 200
+    assert "fork to edit" in one.text.lower()
+
+
+def test_live_edit_and_reflection_endpoints(tmp_path: Path) -> None:
+    repo = Path(__file__).resolve().parents[1]
+    bundle = load_scenario(repo / "scenarios" / "two-devs-and-a-pm")
+
+    class _Stub:
+        def chat_text(self, model, messages, temperature=0.7, max_tokens=4096):
+            return (
+                json.dumps(
+                    {
+                        "narrative": "n",
+                        "channel_posts": [],
+                        "vital_self_report": {},
+                        "work_item_updates": [],
+                        "process_invocations": [],
+                    }
+                ),
+                {"input_tokens": 1, "output_tokens": 1, "cost": 0.0},
+            )
+
+    sess = RunSession.start(
+        scenario_dir=bundle.path,
+        runs_dir=tmp_path,
+        agent_model="stub",
+        coach_model="stub",
+        coach_mode_cli="human",
+        coach_preset_cli=None,
+        secrets=None,
+        client=_Stub(),
+        seed=None,
+    )
+    key = sess.run_root.name
+    SESSIONS[key] = sess
+    app = create_app(runs_dir=tmp_path)
+    c = TestClient(app)
+    rv = c.post(
+        f"/runs/{key}/edit/vital",
+        data={"character_id": "priya", "vital_name": "energy", "delta": 2},
+    )
+    assert rv.status_code == 200
+    rp = c.post(f"/runs/{key}/edit/parameter", data={"key": "x", "value": "y"})
+    assert rp.status_code == 200
+    rr = c.post(f"/runs/{key}/reflection", data={"content": "memo"})
+    assert rr.status_code == 200
+    SESSIONS.pop(key, None)

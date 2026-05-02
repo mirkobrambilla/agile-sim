@@ -12,7 +12,7 @@ import uuid
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -198,6 +198,8 @@ def step_turn(
     order: list[str],
     verbose: bool,
     progress_prefix: str,
+    on_progress: Callable[[dict[str, Any]], None] | None = None,
+    should_cancel: Callable[[], bool] | None = None,
 ) -> tuple[dict[str, int | float], str | None]:
     """Run one simulation turn (agents + coach), persist artifacts, maybe advance `world.turn`.
 
@@ -214,13 +216,24 @@ def step_turn(
     tokens_in = 0
     tokens_out = 0
     cost = 0.0
+    cancel_check = should_cancel or (lambda: False)
+
+    def emit(event: dict[str, Any]) -> None:
+        if on_progress:
+            on_progress(event)
 
     _append_jsonl(timeline, {"kind": "turn_start", "turn": world.turn})
+    emit({"kind": "turn_start", "turn": world.turn})
     for ev in engine.tick(world, bundle):
         _append_jsonl(timeline, ev)
     _progress(verbose, progress_prefix, f"--- turn {world.turn} / {world.max_turns} ---")
 
     for cid in order:
+        if cancel_check():
+            _append_jsonl(timeline, {"kind": "turn_cancelled", "turn": world.turn, "at": f"agent:{cid}"})
+            emit({"kind": "turn_cancelled", "turn": world.turn, "at": f"agent:{cid}"})
+            return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, "cancelled"
+        emit({"kind": "agent_start", "turn": world.turn, "character": cid})
         t0 = time.perf_counter()
         try:
             out, _raw, usage = run_agent_turn(
@@ -290,8 +303,14 @@ def step_turn(
             progress_prefix,
             f"  agent  {cid:12}  {dt_ms:5} ms  model={agent_model}  tok {tin}+{tout}  ${cst:.4f}",
         )
+        emit({"kind": "agent_done", "turn": world.turn, "character": cid, "latency_ms": dt_ms})
 
     t0_coach = time.perf_counter()
+    if cancel_check():
+        _append_jsonl(timeline, {"kind": "turn_cancelled", "turn": world.turn, "at": "coach"})
+        emit({"kind": "turn_cancelled", "turn": world.turn, "at": "coach"})
+        return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, "cancelled"
+    emit({"kind": "coach_start", "turn": world.turn, "source": coach_mode})
     coach_logged_model = coach_model
     try:
         if coach_mode == "none":
@@ -393,6 +412,14 @@ def step_turn(
         f"source={coach_mode}  tok {cin_c}+{cout_c}  ${c_cost:.4f}  "
         f"posts={n_cposts} nudges={n_cnudges}",
     )
+    emit(
+        {
+            "kind": "coach_done",
+            "turn": world.turn,
+            "source": coach_mode,
+            "latency_ms": coach_dt_ms,
+        }
+    )
     _append_jsonl(
         timeline,
         {
@@ -410,12 +437,15 @@ def step_turn(
 
     if goal_met(world):
         _progress(verbose, progress_prefix, "stop: goal_met")
+        emit({"kind": "turn_stop", "turn": world.turn, "stop": "goal_met"})
         return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, "goal_met"
     if goal_abort(world):
         _progress(verbose, progress_prefix, "stop: aborted_stress")
+        emit({"kind": "turn_stop", "turn": world.turn, "stop": "aborted_stress"})
         return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, "aborted_stress"
 
     world.turn += 1
+    emit({"kind": "turn_done", "turn": world.turn - 1})
     return {"input_tokens": tokens_in, "output_tokens": tokens_out, "cost": cost}, None
 
 

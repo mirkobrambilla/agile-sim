@@ -1,4 +1,11 @@
 @layer components {
+  .htmx-indicator {
+    display: none;
+  }
+  .htmx-request.htmx-indicator {
+    display: inline-flex;
+  }
+
   .panel {
     background-color: var(--color-bg-panel);
     border: 1px solid var(--color-border);
@@ -125,11 +132,46 @@
     white-space: pre-wrap;
     word-break: break-word;
   }
+  .msg-mention {
+    color: var(--color-accent);
+    background: rgba(58, 110, 165, 0.10);
+    border-radius: var(--radius-sm);
+    padding: 0 0.2em;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .msg-mention:hover {
+    background: rgba(58, 110, 165, 0.18);
+    text-decoration: underline;
+  }
   .msg--coach {
     border-left-color: var(--color-accent-warm);
     background-color: rgba(58, 110, 165, 0.04);
     padding: var(--space-2) var(--space-3);
     border-radius: var(--radius-sm);
+  }
+  .msg--dense {
+    border-left-width: 2px;
+    padding-left: var(--space-2);
+  }
+  .channel-header {
+    background: var(--color-panel-chrome);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+  }
+  .channel-composer {
+    background: var(--color-bg-panel);
+    padding-bottom: var(--space-2);
+  }
+  .channel-messages {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 65vh;
+  }
+  .sprite--framed {
+    box-shadow: 0 0 0 1px var(--color-accent-jrpg-gold), 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .kanban-col {
@@ -151,15 +193,108 @@
 
   .topbar {
     border-bottom: 1px solid var(--color-border);
+    background: var(--color-panel-chrome);
+  }
+  .runner-topbar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+  }
+  .runner-topbar-actions {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .turn-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     background: var(--color-bg-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.15rem 0.25rem;
+  }
+  .turn-nav__arrow {
+    color: var(--color-accent);
+    text-decoration: none;
+    padding: 0.1rem 0.25rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+  }
+  .turn-nav__pill {
+    min-width: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    padding: 0.12rem 0.35rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-family: var(--font-mono);
+  }
+  .turn-nav__pill--active {
+    color: var(--color-text);
+    border-color: var(--color-accent);
+    background: var(--color-rail-active);
+  }
+  .turn-nav__dots {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    padding: 0 0.1rem;
   }
   .app-rail {
     border-right: 1px solid var(--color-border);
+    background: var(--color-rail-bg);
+  }
+  .app-rail__icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    font-family: var(--font-pixel);
+    letter-spacing: 0.03em;
+    color: var(--color-text);
+    text-decoration: none;
     background: var(--color-bg-panel);
+  }
+  .app-rail__icon--active {
+    background: var(--color-rail-active);
+    border-color: var(--color-accent);
   }
   .left-rail {
     border-right: 1px solid var(--color-border);
     background: var(--color-bg-app);
+  }
+  .left-rail__section-title {
+    font-size: 0.62rem;
+    font-family: var(--font-pixel);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+  .left-rail__btn {
+    position: relative;
+    gap: var(--space-2);
+    font-size: 0.8rem;
+  }
+  .left-rail__btn--active {
+    border-color: var(--color-accent) !important;
+    background: var(--color-bg-panel);
+  }
+  .channel-attention-dot {
+    width: 0.35rem;
+    height: 0.35rem;
+    border-radius: 9999px;
+    background: var(--color-warn);
+    display: inline-block;
   }
   .right-rail {
     border-left: 1px solid var(--color-border);
@@ -239,6 +374,14 @@
     border: 1px dashed var(--color-border);
     background: var(--color-bg-app);
     opacity: 0.5;
+  }
+  .msg__react-pill {
+    padding: 0.1rem 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-panel);
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
   }
 
   .msg__react-slot:hover {
@@ -321,6 +464,56 @@
     height: 100%;
     border-radius: 9999px;
     background: var(--color-accent-teal);
+  }
+  .kanban-col__head {
+    margin-bottom: var(--space-3);
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.68rem;
+    font-family: var(--font-pixel);
+    letter-spacing: 0.03em;
+    color: #fff;
+    text-transform: uppercase;
+  }
+  .kanban-col__head--backlog {
+    background: var(--color-state-backlog);
+  }
+  .kanban-col__head--doing {
+    background: var(--color-state-doing);
+  }
+  .kanban-col__head--done {
+    background: var(--color-state-done);
+  }
+  .kanban-col__head--parked {
+    background: var(--color-state-parked);
+  }
+  .kanban-state-pill {
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+    border-radius: 9999px;
+    padding: 0.08rem 0.45rem;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    background: var(--color-bg-app);
+  }
+  .kanban-state-pill--backlog {
+    border-color: var(--color-state-backlog);
+    color: var(--color-state-backlog);
+  }
+  .kanban-state-pill--doing {
+    border-color: var(--color-state-doing);
+    color: var(--color-state-doing);
+  }
+  .kanban-state-pill--done {
+    border-color: var(--color-state-done);
+    color: var(--color-state-done);
+  }
+  .kanban-state-pill--parked {
+    border-color: var(--color-state-parked);
+    color: var(--color-state-parked);
   }
 
   .kanban-person-head {

@@ -2,18 +2,24 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
+import re
+import shutil
+import time
 from pathlib import Path
 from typing import Any
 
+import yaml
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from harness.analyse import batch_metrics, load_meta
 from harness.runner import load_api_key
+from harness.scenario import list_scenarios
 from harness.web.render import md_to_html
 from harness.web.resolve import (
     ResolvedBatch,
@@ -35,6 +41,7 @@ from harness.web.run_reader import (
     work_item_timeline_events,
 )
 from harness.web.run_session import SESSIONS, RunSession
+from harness.world import parse_mentions
 
 
 def _runs_dir_kw(runs_dir: Path | None) -> Path:
@@ -47,8 +54,8 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def _safe_scenario_dir(repo: Path, slug: str) -> Path:
-    base = (repo / "scenarios").resolve()
+def _safe_scenario_dir(scenarios_root: Path, slug: str) -> Path:
+    base = scenarios_root.resolve()
     cand = (base / slug.strip()).resolve()
     try:
         cand.relative_to(base)
@@ -59,14 +66,20 @@ def _safe_scenario_dir(repo: Path, slug: str) -> Path:
     return cand
 
 
-def _list_scenario_slugs(repo: Path) -> list[dict[str, str]]:
-    root = repo / "scenarios"
-    if not root.is_dir():
-        return []
-    rows: list[dict[str, str]] = []
-    for p in sorted(root.iterdir()):
-        if p.is_dir() and (p / "scenario.yaml").is_file():
-            rows.append({"slug": p.name, "id": p.name})
+def _scenario_cards(scenarios_root: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for s in list_scenarios(scenarios_root):
+        rows.append(
+            {
+                "slug": s.slug,
+                "id": s.id,
+                "name": s.name,
+                "description": s.description,
+                "characters_count": s.characters_count,
+                "channels_count": s.channels_count,
+                "cover_url": s.cover_url,
+            }
+        )
     return rows
 
 
@@ -96,7 +109,12 @@ def _runner_ctx(
     eff_turn: int,
     max_turn: int,
 ) -> dict[str, Any]:
-    from harness.web.sprites import character_meta_by_id, expression_from_vitals, sprite_url
+    from harness.web.sprites import (
+        character_meta_by_id,
+        character_sprite_set,
+        expression_from_vitals,
+        sprite_url,
+    )
 
     scen = scenario_from_bundle_meta(bundle.meta)
     char_meta = character_meta_by_id(scen)
@@ -136,6 +154,7 @@ def _runner_ctx(
         "viewing_replay": eff_turn != live_turn,
         "max_turn_ui": max_turn,
         "sprite_set": "default",
+        "character_sprite_set": character_sprite_set,
         "expression_from_vitals": expression_from_vitals,
         "sprite_url": sprite_url,
         "team_members": team_members,
@@ -158,8 +177,22 @@ def _vitals_spark_map(bundle: Any, chars: dict[str, Any]) -> dict[str, dict[str,
     return out
 
 
-def create_app(*, runs_dir: Path | None = None) -> FastAPI:
+def _channel_attention_map(bundle: Any, *, since_turn: int) -> dict[str, bool]:
+    out: dict[str, bool] = {}
+    for c in bundle.channels:
+        cid = c.id
+        msgs = bundle.messages_by_channel.get(cid, [])
+        if not msgs:
+            out[cid] = False
+            continue
+        last = msgs[-1]
+        out[cid] = bool(last.turn >= since_turn and str(last.author).lower() == "coach")
+    return out
+
+
+def create_app(*, runs_dir: Path | None = None, scenarios_dir: Path | None = None) -> FastAPI:
     runs_dir = _runs_dir_kw(runs_dir)
+    scenarios_root = scenarios_dir.resolve() if scenarios_dir is not None else (_repo_root() / "scenarios")
     pkg = Path(__file__).resolve().parent
     templates_dir = pkg / "templates"
     static_dir = pkg / "static"
@@ -169,6 +202,44 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
         autoescape=select_autoescape(["html", "xml"]),
     )
     jinja.filters["tojson"] = lambda v: json.dumps(v, indent=2, default=str, ensure_ascii=False)
+
+    def _render_mentions(text: str, scenario: dict[str, Any] | None, run_url_path: str, turn: int) -> str:
+        """Linkify `@cid` mentions in message bodies to open the target's DM."""
+
+        from markupsafe import Markup, escape
+        from urllib.parse import quote
+
+        scen = scenario or {}
+        ids = {str(c.get("id", "")).strip() for c in (scen.get("characters") or []) if c.get("id")}
+        ids = {x for x in ids if x}
+        if not text:
+            return ""
+        if not ids:
+            return str(escape(text))
+        valid = parse_mentions(text, ids)
+        if not valid:
+            return str(escape(text))
+        valid_lower = {x.lower() for x in valid}
+        out_parts: list[str] = []
+        last = 0
+        for m in re.finditer(r"@([A-Za-z][A-Za-z0-9_-]{0,31})", text):
+            cid_raw = m.group(1)
+            cid_lc = cid_raw.lower()
+            if cid_lc not in valid_lower:
+                continue
+            out_parts.append(str(escape(text[last : m.start()])))
+            dm = f"dm/{cid_lc}"
+            url = f"/partials/run/{run_url_path}/channel?channel={quote(dm)}&turn={turn}"
+            out_parts.append(
+                '<a class="msg-mention" href="#"'
+                f' hx-get="{url}" hx-target="#center-stage" hx-swap="innerHTML"'
+                f' title="Open DM with @{escape(cid_raw)}">@{escape(cid_raw)}</a>'
+            )
+            last = m.end()
+        out_parts.append(str(escape(text[last:])))
+        return Markup("".join(out_parts))
+
+    jinja.globals["render_mentions"] = _render_mentions
 
     app = FastAPI(title="agile-sim harness", version="0.1")
 
@@ -239,14 +310,6 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
             comparison_html=cmp_html,
             judge_html=judge_html,
         )
-
-    @app.get("/runs/{run_path:path}/at/{turn}", response_class=HTMLResponse)
-    async def runner_at_turn(request: Request, run_path: str, turn: int) -> HTMLResponse:
-        return _runner_page(request, run_path, turn=turn)
-
-    @app.get("/runs/{run_path:path}", response_class=HTMLResponse)
-    async def runner(request: Request, run_path: str) -> HTMLResponse:
-        return _runner_page(request, run_path, turn=None)
 
     def _runner_page(
         request: Request, run_path: str, *, turn: int | None
@@ -323,6 +386,7 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
                 "snap_world": snap_world,
                 "goal_status": goal_status,
                 "channel_query": request.query_params.get("channel", bundle.primary_channel),
+                "channel_attention": _channel_attention_map(bundle, since_turn=head_turn),
                 "vitals_sparks": _vitals_spark_map(
                     bundle, (snap_world or {}).get("characters") or {}
                 ),
@@ -345,6 +409,7 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
                 "snap_world": snap_world,
                 "goal_status": goal_status,
                 "channel_query": request.query_params.get("channel", bundle.primary_channel),
+                "channel_attention": _channel_attention_map(bundle, since_turn=eff_turn),
                 "vitals_sparks": _vitals_spark_map(
                     bundle, (snap_world or {}).get("characters") or {}
                 ),
@@ -367,6 +432,7 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
                 "snap_world": snap_world,
                 "goal_status": goal_status,
                 "channel_query": request.query_params.get("channel", bundle.primary_channel),
+                "channel_attention": _channel_attention_map(bundle, since_turn=eff_turn),
                 "vitals_sparks": _vitals_spark_map(
                     bundle, (snap_world or {}).get("characters") or {}
                 ),
@@ -379,11 +445,13 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
 
     @app.get("/new", response_class=HTMLResponse)
     async def new_run_form(request: Request) -> HTMLResponse:
-        repo = _repo_root()
+        cards = _scenario_cards(scenarios_root)
+        selected = request.query_params.get("scenario", "").strip()
         return render(
             "new_run.html",
             request,
-            scenarios=_list_scenario_slugs(repo),
+            scenarios=cards,
+            selected_scenario=selected,
             runs_dir=str(runs_dir),
         )
 
@@ -391,12 +459,11 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
     async def start_live_run(
         request: Request,
         scenario_slug: str = Form(...),
-        agent_model: str = Form("stub"),
+        agent_model: str = Form("google/gemini-3-flash-preview"),
         coach_model: str = Form(""),
         coach_mode: str = Form("llm"),
     ) -> RedirectResponse:
-        repo = _repo_root()
-        scen = _safe_scenario_dir(repo, scenario_slug)
+        scen = _safe_scenario_dir(scenarios_root, scenario_slug)
         try:
             from harness.integrations.openrouter import OpenRouterClient
 
@@ -410,7 +477,7 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
         sess = RunSession.start(
             scenario_dir=scen,
             runs_dir=runs_dir,
-            agent_model=agent_model.strip() or "stub",
+            agent_model=agent_model.strip() or "google/gemini-3-flash-preview",
             coach_model=cm,
             coach_mode_cli=coach_mode.strip().lower(),
             coach_preset_cli=None,
@@ -422,7 +489,7 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
         SESSIONS[url_p] = sess
         return RedirectResponse(url=f"/runs/{url_p}", status_code=303)
 
-    @app.post("/runs/{run_path:path}/advance", response_class=HTMLResponse)
+    @app.post("/runs/{run_path}/advance", response_class=HTMLResponse)
     async def live_advance(request: Request, run_path: str) -> HTMLResponse:
         r = _require_resolved_run(run_path)
         url_p = run_url_path(runs_dir=runs_dir, run_dir=r.run_dir)
@@ -482,7 +549,38 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
         )
         return HTMLResponse(oob)
 
-    @app.post("/runs/{run_path:path}/coach/post", response_class=HTMLResponse)
+    @app.get("/runs/{run_path}/events")
+    async def live_events(run_path: str) -> StreamingResponse:
+        r = _require_resolved_run(run_path)
+        url_p = run_url_path(runs_dir=runs_dir, run_dir=r.run_dir)
+        sess = SESSIONS.get(url_p)
+        if sess is None:
+            raise HTTPException(status_code=404, detail="no active live session")
+
+        async def _gen():
+            while True:
+                try:
+                    evt = await asyncio.wait_for(sess.events.get(), timeout=5.0)
+                except TimeoutError:
+                    yield "event: progress\ndata: {}\n\n"
+                    break
+                yield f"event: progress\ndata: {json.dumps(evt)}\n\n"
+                if evt.get("kind") in {"advance_stop", "advance_cancelled"}:
+                    break
+
+        return StreamingResponse(_gen(), media_type="text/event-stream")
+
+    @app.post("/runs/{run_path}/cancel")
+    async def live_cancel(run_path: str) -> dict[str, Any]:
+        r = _require_resolved_run(run_path)
+        url_p = run_url_path(runs_dir=runs_dir, run_dir=r.run_dir)
+        sess = SESSIONS.get(url_p)
+        if sess is None:
+            raise HTTPException(status_code=404, detail="no active live session")
+        sess.cancel()
+        return {"ok": True}
+
+    @app.post("/runs/{run_path}/coach/post", response_class=HTMLResponse)
     async def live_coach_post(
         request: Request,
         run_path: str,
@@ -494,8 +592,6 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
         sess = SESSIONS.get(url_p)
         if sess is None or sess.finished:
             raise HTTPException(status_code=400, detail="no active live session")
-        if sess.coach_mode != "human":
-            raise HTTPException(status_code=400, detail="coach post only when coach_mode=human")
         sess.coach_post(channel=channel, content=content, author="coach")
         bundle = load_run(run_dir=r.run_dir, url_path=url_p)
         ch = channel.strip() or bundle.primary_channel
@@ -517,6 +613,50 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
             session_coach_mode=sess.coach_mode,
         )
         return HTMLResponse(channel_html)
+
+    @app.post("/runs/{run_path}/reflection", response_class=HTMLResponse)
+    async def live_reflection(
+        request: Request, run_path: str, content: str = Form("")
+    ) -> HTMLResponse:
+        r = _require_resolved_run(run_path)
+        url_p = run_url_path(runs_dir=runs_dir, run_dir=r.run_dir)
+        sess = SESSIONS.get(url_p)
+        if sess is None:
+            raise HTTPException(status_code=404, detail="no active live session")
+        sess.write_reflection(content)
+        return HTMLResponse('<div class="text-xs text-[var(--color-text-muted)]">Reflection saved.</div>')
+
+    @app.post("/runs/{run_path}/edit/vital")
+    async def live_edit_vital(
+        run_path: str,
+        character_id: str = Form(...),
+        vital_name: str = Form(...),
+        delta: int = Form(...),
+    ) -> dict[str, Any]:
+        r = _require_resolved_run(run_path)
+        url_p = run_url_path(runs_dir=runs_dir, run_dir=r.run_dir)
+        sess = SESSIONS.get(url_p)
+        if sess is None:
+            raise HTTPException(status_code=404, detail="no active live session")
+        try:
+            info = sess.edit_vital(character_id=character_id, vital_name=vital_name, delta=delta)
+        except ValueError as err:
+            raise HTTPException(status_code=400, detail=str(err)) from err
+        return {"ok": True, "message": "applied — takes effect at turn N+1", "edit": info}
+
+    @app.post("/runs/{run_path}/edit/parameter")
+    async def live_edit_parameter(
+        run_path: str,
+        key: str = Form(...),
+        value: str = Form(...),
+    ) -> dict[str, Any]:
+        r = _require_resolved_run(run_path)
+        url_p = run_url_path(runs_dir=runs_dir, run_dir=r.run_dir)
+        sess = SESSIONS.get(url_p)
+        if sess is None:
+            raise HTTPException(status_code=404, detail="no active live session")
+        info = sess.edit_parameter(key=key, value=value)
+        return {"ok": True, "message": "applied — takes effect at turn N+1", "edit": info}
 
     @app.get("/partials/run/{run_path:path}/kanban", response_class=HTMLResponse)
     async def partial_kanban(request: Request, run_path: str) -> HTMLResponse:
@@ -565,7 +705,50 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
     async def partial_summary(request: Request, run_path: str) -> HTMLResponse:
         r = _require_resolved_run(run_path)
         bundle = load_run(run_dir=r.run_dir, url_path=run_url_path(runs_dir=runs_dir, run_dir=r.run_dir))
-        return render("partials/summary.html", request, bundle=bundle)
+        scen = scenario_from_bundle_meta(bundle.meta)
+        from harness.web.sprites import character_meta_by_id, character_sprite_set, expression_from_vitals, sprite_url
+
+        char_meta = character_meta_by_id(scen)
+        first_world = bundle.snapshots[0].world if bundle.snapshots else {}
+        last_world = bundle.snapshots[-1].world if bundle.snapshots else {}
+        chars_first = (first_world.get("characters") or {}) if first_world else {}
+        chars_last = (last_world.get("characters") or {}) if last_world else {}
+        arc_rows: list[dict[str, Any]] = []
+        for cid in sorted(set(chars_first.keys()) | set(chars_last.keys())):
+            sv = chars_first.get(cid, {}).get("vitals") or {}
+            ev = chars_last.get(cid, {}).get("vitals") or {}
+            spark = svg_sparkline([v for _, v in vitals_history_for_character(bundle, cid, "stress")])
+            ss = character_sprite_set(scen, cid)
+            start_expr = expression_from_vitals(sv)
+            end_expr = expression_from_vitals(ev)
+            arc_rows.append(
+                {
+                    "id": cid,
+                    "name": (char_meta.get(cid) or {}).get("name", cid),
+                    "stress_spark": spark,
+                    "start_vitals": sv,
+                    "end_vitals": ev,
+                    "start_sprite": sprite_url(ss, start_expr),
+                    "end_sprite": sprite_url(ss, end_expr),
+                }
+            )
+        metrics_delivery = []
+        metrics_happiness = []
+        for s in bundle.snapshots:
+            org = (s.world or {}).get("org") or {}
+            if "delivery_progress" in org:
+                metrics_delivery.append(int(org.get("delivery_progress") or 0))
+            if "happiness" in org:
+                metrics_happiness.append(int(org.get("happiness") or 0))
+        return render(
+            "partials/summary.html",
+            request,
+            bundle=bundle,
+            arc_rows=arc_rows,
+            metrics_delivery_svg=svg_sparkline(metrics_delivery),
+            metrics_happiness_svg=svg_sparkline(metrics_happiness),
+            reflection_text=((bundle.run_dir / "reflection.md").read_text(encoding="utf-8") if (bundle.run_dir / "reflection.md").exists() else ""),
+        )
 
     @app.get("/partials/run/{run_path:path}/vitals", response_class=HTMLResponse)
     async def partial_vitals(request: Request, run_path: str) -> HTMLResponse:
@@ -723,5 +906,41 @@ def create_app(*, runs_dir: Path | None = None) -> FastAPI:
             "session_coach_mode": ls.coach_mode if ls else "",
         }
         return render("partials/channel_view.html", request, **ctx)
+
+    @app.get("/scenarios", response_class=HTMLResponse)
+    async def scenarios_index(request: Request) -> HTMLResponse:
+        cards = _scenario_cards(scenarios_root)
+        return render("scenarios_index.html", request, scenarios=cards)
+
+    @app.get("/scenarios/{slug}", response_class=HTMLResponse)
+    async def scenarios_view(request: Request, slug: str) -> HTMLResponse:
+        scen_dir = _safe_scenario_dir(scenarios_root, slug)
+        data = json.loads(json.dumps(yaml.safe_load((scen_dir / "scenario.yaml").read_text(encoding="utf-8")) or {}))
+        setting_md = (scen_dir / str(data.get("setting_file") or "setting.md"))
+        setting_html = md_to_html(setting_md.read_text(encoding="utf-8")) if setting_md.exists() else ""
+        return render(
+            "scenario_view.html",
+            request,
+            slug=slug,
+            scenario=data,
+            setting_html=setting_html,
+        )
+
+    @app.post("/scenarios/{slug}/fork")
+    async def scenarios_fork(slug: str) -> RedirectResponse:
+        src = _safe_scenario_dir(scenarios_root, slug)
+        ts = int(time.time())
+        dst_name = f"{slug}__fork-{ts}"
+        dst = scenarios_root / dst_name
+        shutil.copytree(src, dst)
+        return RedirectResponse(url=f"/scenarios/{dst_name}", status_code=303)
+
+    @app.get("/runs/{run_path:path}/at/{turn}", response_class=HTMLResponse)
+    async def runner_at_turn(request: Request, run_path: str, turn: int) -> HTMLResponse:
+        return _runner_page(request, run_path, turn=turn)
+
+    @app.get("/runs/{run_path:path}", response_class=HTMLResponse)
+    async def runner(request: Request, run_path: str) -> HTMLResponse:
+        return _runner_page(request, run_path, turn=None)
 
     return app

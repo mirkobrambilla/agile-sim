@@ -10,7 +10,14 @@
   --color-accent-teal: #2d8a8a;
   --color-accent-jrpg-gold: #c9a227;
   --color-accent-jrpg-rose: #c45c6a;
+  --color-accent-jrpg-azure: #3f69a8;
   --color-panel-chrome: #e8ecf4;
+  --color-rail-bg: #e7ecf7;
+  --color-rail-active: #d7e2f7;
+  --color-state-backlog: #8a97b8;
+  --color-state-doing: #3b7ec8;
+  --color-state-done: #41a86a;
+  --color-state-parked: #b08643;
   --color-ok: #4caf50;
   --color-warn: #f0b429;
   --color-fail: #d04848;

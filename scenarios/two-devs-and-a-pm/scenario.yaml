@@ -26,6 +26,7 @@ characters:
   - id: priya
     name: Priya Shah
     role: Tech lead
+    sprite_set: char_priya
     markdown_file: characters/priya.md
     initial_vitals:
       energy: 70
@@ -34,6 +35,7 @@ characters:
   - id: marcus
     name: Marcus Chen
     role: Backend engineer
+    sprite_set: char_marcus
     markdown_file: characters/marcus.md
     initial_vitals:
       energy: 65
@@ -42,6 +44,7 @@ characters:
   - id: lin
     name: Lin Okonkwo
     role: Product manager
+    sprite_set: char_lin
     markdown_file: characters/lin.md
     initial_vitals:
       energy: 75

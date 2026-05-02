@@ -20,9 +20,28 @@
     <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-1">Channel snippets</h4>
     <ul class="list-none p-0 m-0 flex flex-col gap-2 max-h-40 overflow-y-auto">
       {% for m in inspect_recent_posts %}
-      <li class="text-xs"><span class="font-mono text-[var(--color-text-muted)]">{{ m.channel }}</span> · T{{ m.turn }} — {{ m.content[:120] }}{% if m.content|length > 120 %}…{% endif %}</li>
+      <li class="text-xs"><span class="font-mono text-[var(--color-text-muted)]">{{ m.channel }}</span> · T{{ m.turn }} — {{ render_mentions(m.content[:120], scenario, bundle.url_path, effective_turn)|safe }}{% if m.content|length > 120 %}…{% endif %}</li>
       {% endfor %}
     </ul>
   </div>
   {% endif %}
+  <form
+    class="panel panel-section flex flex-col gap-2"
+    hx-post="/runs/{{ bundle.url_path }}/edit/vital"
+    hx-target="#inspector-edit-status"
+    hx-swap="innerHTML"
+  >
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)]">Vital nudge</h4>
+    <input type="hidden" name="character_id" value="{{ inspect_cid }}" />
+    <div class="flex gap-2">
+      <select name="vital_name" class="flex-1 text-xs border border-[var(--color-border)] rounded-[var(--radius-sm)] p-1 bg-[var(--color-bg-panel)]">
+        <option value="energy">energy</option>
+        <option value="motivation">motivation</option>
+        <option value="stress">stress</option>
+      </select>
+      <input name="delta" type="number" value="1" class="w-20 text-xs border border-[var(--color-border)] rounded-[var(--radius-sm)] p-1 bg-[var(--color-bg-panel)]" />
+      <button type="submit" class="btn btn-ghost text-xs">Apply</button>
+    </div>
+    <div id="inspector-edit-status" class="text-[0.7rem] text-[var(--color-text-muted)]">applied — takes effect at turn N+1</div>
+  </form>
 </div>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}New live run — agile-sim{% endblock %}
 {% block body %}
-<div class="max-w-lg mx-auto p-6 flex flex-col gap-4">
+<div class="max-w-4xl mx-auto p-6 flex flex-col gap-4">
   <h1 class="text-xl font-bold">Start a live run</h1>
   <p class="text-sm text-[var(--color-text-muted)]">Creates a run under {{ runs_dir }} and opens the runner. Requires OpenRouter credentials in <code class="font-mono">secrets.yaml</code>.</p>
   <form method="post" action="/runs" class="flex flex-col gap-3">
@@ -9,15 +9,28 @@
       <span class="font-semibold">Scenario</span>
       <select name="scenario_slug" required class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2">
         {% for s in scenarios %}
-        <option value="{{ s.slug }}">{{ s.slug }}</option>
+        <option value="{{ s.slug }}" {% if selected_scenario and selected_scenario == s.slug %}selected{% endif %}>
+          {{ s.name }} ({{ s.id }}) · {{ s.characters_count }} chars · {{ s.channels_count }} channels
+        </option>
         {% else %}
         <option value="">(no scenarios/ with scenario.yaml)</option>
         {% endfor %}
       </select>
     </label>
+    {% if scenarios %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {% for s in scenarios %}
+      <div class="panel panel-section text-xs">
+        <div class="font-semibold">{{ s.name }}</div>
+        <div class="text-[var(--color-text-muted)] font-mono">{{ s.id }}</div>
+        <div class="text-[var(--color-text-muted)] mt-1">{{ s.characters_count }} characters · {{ s.channels_count }} channels</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
     <label class="flex flex-col gap-1 text-sm">
       <span class="font-semibold">Agent model</span>
-      <input name="agent_model" value="stub" class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2 font-mono" />
+      <input name="agent_model" value="google/gemini-3-flash-preview" class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2 font-mono" />
     </label>
     <label class="flex flex-col gap-1 text-sm">
       <span class="font-semibold">Coach model (optional)</span>

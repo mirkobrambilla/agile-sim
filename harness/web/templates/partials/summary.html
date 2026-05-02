@@ -1,4 +1,21 @@
-<div class="flex flex-col gap-4 max-w-3xl">
+<div class="flex flex-col gap-4 max-w-5xl">
+  {% if bundle.summary.get('aborted_stress') %}
+  <div class="panel panel-section border-l-4 border-[var(--color-fail)]">
+    <h2 class="text-base font-semibold text-[var(--color-fail)]">Outcome: stress abort</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">The run ended due to stress guardrails.</p>
+  </div>
+  {% elif bundle.summary.get('goal_met') %}
+  <div class="panel panel-section border-l-4 border-[var(--color-ok)]">
+    <h2 class="text-base font-semibold text-[var(--color-ok)]">Outcome: goal met</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">Goals reached within configured constraints.</p>
+  </div>
+  {% else %}
+  <div class="panel panel-section border-l-4 border-[var(--color-warn)]">
+    <h2 class="text-base font-semibold text-[var(--color-warn)]">Outcome: review required</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">Run ended without a clear success/abort signal.</p>
+  </div>
+  {% endif %}
+
   <h2 class="text-lg font-semibold">Summary</h2>
   <dl class="grid grid-cols-2 gap-2 text-sm max-w-md">
     <dt class="text-[var(--color-text-muted)]">Goal met</dt><dd>{{ bundle.summary.get('goal_met') }}</dd>
@@ -6,6 +23,51 @@
     <dt class="text-[var(--color-text-muted)]">Work done</dt><dd>{{ bundle.summary.get('work_done') }}</dd>
     <dt class="text-[var(--color-text-muted)]">Aborted (stress)</dt><dd>{{ bundle.summary.get('aborted_stress') }}</dd>
   </dl>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div class="panel panel-section">
+      <h3 class="text-sm font-semibold mb-2">Character arcs</h3>
+      <div class="flex flex-col gap-2">
+        {% for row in arc_rows or [] %}
+        <div class="border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2">
+          <div class="text-xs font-semibold mb-1">{{ row.name }}</div>
+          <div class="flex items-center gap-2 text-[0.7rem] text-[var(--color-text-muted)]">
+            {% if row.start_sprite %}
+            <span class="sprite sprite--from-asset w-7 h-7" style="background-image:url('{{ row.start_sprite }}')"></span>
+            {% else %}
+            <span class="sprite sprite--idle w-7 h-7">{{ (row.id[:2])|upper }}</span>
+            {% endif %}
+            <span>→</span>
+            {% if row.end_sprite %}
+            <span class="sprite sprite--from-asset w-7 h-7" style="background-image:url('{{ row.end_sprite }}')"></span>
+            {% else %}
+            <span class="sprite sprite--idle w-7 h-7">{{ (row.id[:2])|upper }}</span>
+            {% endif %}
+            <span>E {{ row.start_vitals.get('energy','?') }}→{{ row.end_vitals.get('energy','?') }}</span>
+            <span>M {{ row.start_vitals.get('motivation','?') }}→{{ row.end_vitals.get('motivation','?') }}</span>
+            <span>S {{ row.start_vitals.get('stress','?') }}→{{ row.end_vitals.get('stress','?') }}</span>
+          </div>
+          <div class="mt-1 text-[var(--color-accent)]">{{ row.stress_spark|safe }}</div>
+        </div>
+        {% else %}
+        <p class="text-xs text-[var(--color-text-muted)]">No snapshot data yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="panel panel-section">
+      <h3 class="text-sm font-semibold mb-2">Metrics over time</h3>
+      <div class="text-xs text-[var(--color-text-muted)] mb-2">Delivery progress</div>
+      <div class="text-[var(--color-accent)]">{{ metrics_delivery_svg|safe }}</div>
+      <div class="text-xs text-[var(--color-text-muted)] mt-3 mb-2">Happiness</div>
+      <div class="text-[var(--color-accent-teal)]">{{ metrics_happiness_svg|safe }}</div>
+    </div>
+  </div>
+
+  <div class="panel panel-section">
+    <h3 class="text-sm font-semibold mb-2">Coach reflection</h3>
+    <div class="text-xs text-[var(--color-text-muted)] whitespace-pre-wrap">{{ reflection_text or "(no reflection captured yet)" }}</div>
+  </div>
+
   {% if bundle.report_html %}
   <div class="panel overflow-hidden">
     <h3 class="panel-section text-sm font-semibold border-b border-[var(--color-border)]">report.md</h3>

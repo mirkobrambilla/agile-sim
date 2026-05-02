@@ -1,0 +1,32 @@
+<div class="flex flex-col gap-4 text-sm">
+  <div class="flex items-center justify-between gap-2">
+    <h3 class="text-base font-bold">Dev panel</h3>
+    <button type="button" class="text-xs text-[var(--color-text-muted)] hover:underline" @click="devPanelOpen = false">Close</button>
+  </div>
+
+  <section class="panel panel-section">
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-2">Cost / latency overview</h4>
+    <dl class="grid grid-cols-2 gap-2 text-xs">
+      <dt class="text-[var(--color-text-muted)]">Input tokens</dt><dd>{{ (bundle.summary.get('totals') or {}).get('input_tokens', 0) }}</dd>
+      <dt class="text-[var(--color-text-muted)]">Output tokens</dt><dd>{{ (bundle.summary.get('totals') or {}).get('output_tokens', 0) }}</dd>
+      <dt class="text-[var(--color-text-muted)]">Cost</dt><dd>${{ '%.4f'|format(((bundle.summary.get('totals') or {}).get('cost', 0))|float) }}</dd>
+      <dt class="text-[var(--color-text-muted)]">Elapsed</dt><dd>{{ (bundle.summary.get('totals') or {}).get('elapsed_s', 0) }}s</dd>
+    </dl>
+  </section>
+
+  <section class="panel panel-section">
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-2">Engine trace (recent)</h4>
+    <ul class="list-none p-0 m-0 flex flex-col gap-1 text-xs max-h-48 overflow-y-auto">
+      {% for row in bundle.timeline[-25:] %}
+      <li><span class="font-mono text-[var(--color-text-muted)]">{{ row.raw.get('turn','-') }}</span> · {{ row.kind }}</li>
+      {% else %}
+      <li class="text-[var(--color-text-muted)]">No timeline rows.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="panel panel-section">
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)] mb-2">Raw event view</h4>
+    <pre class="text-[0.65rem] bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 overflow-auto max-h-56">{{ (bundle.timeline[-15:]|map(attribute='raw')|list)|tojson }}</pre>
+  </section>
+</div>

@@ -31,6 +31,75 @@ sets:
       - id: sad
         prompt: "{style}. Expression: downcast eyes, subtle frown, subdued."
 
+  - id: char_priya
+    style: >-
+      JRPG pixel-art portrait bust of Priya, south-asian woman, short dark hair,
+      sharp focused eyes, teal hoodie, transparent background, crisp pixel edges,
+      no text, no watermark
+    items:
+      - id: idle
+        prompt: "{style}. Expression: calm neutral, slight relaxed smile, eyes open."
+      - id: happy
+        prompt: "{style}. Expression: bright genuine smile, eyes slightly closed with joy."
+      - id: frustrated
+        prompt: "{style}. Expression: furrowed brow, tight mouth, mild annoyance."
+      - id: overloaded
+        prompt: "{style}. Expression: stressed, wide eyes, sweat drop vibe, overwhelmed."
+      - id: bored
+        prompt: "{style}. Expression: half-lidded eyes, flat mouth, uninterested."
+      - id: surprised
+        prompt: "{style}. Expression: raised brows, small o-shaped mouth, alert."
+      - id: proud
+        prompt: "{style}. Expression: confident slight smirk, chin up, satisfied."
+      - id: sad
+        prompt: "{style}. Expression: downcast eyes, subtle frown, subdued."
+
+  - id: char_marcus
+    style: >-
+      JRPG pixel-art portrait bust of Marcus, black man, short curls, warm brown skin,
+      practical engineering jacket, transparent background, crisp pixel edges,
+      no text, no watermark
+    items:
+      - id: idle
+        prompt: "{style}. Expression: calm neutral, slight relaxed smile, eyes open."
+      - id: happy
+        prompt: "{style}. Expression: bright genuine smile, eyes slightly closed with joy."
+      - id: frustrated
+        prompt: "{style}. Expression: furrowed brow, tight mouth, mild annoyance."
+      - id: overloaded
+        prompt: "{style}. Expression: stressed, wide eyes, sweat drop vibe, overwhelmed."
+      - id: bored
+        prompt: "{style}. Expression: half-lidded eyes, flat mouth, uninterested."
+      - id: surprised
+        prompt: "{style}. Expression: raised brows, small o-shaped mouth, alert."
+      - id: proud
+        prompt: "{style}. Expression: confident slight smirk, chin up, satisfied."
+      - id: sad
+        prompt: "{style}. Expression: downcast eyes, subtle frown, subdued."
+
+  - id: char_lin
+    style: >-
+      JRPG pixel-art portrait bust of Lin, east-asian person, medium dark hair tied back,
+      round glasses, neutral blazer, transparent background, crisp pixel edges,
+      no text, no watermark
+    items:
+      - id: idle
+        prompt: "{style}. Expression: calm neutral, slight relaxed smile, eyes open."
+      - id: happy
+        prompt: "{style}. Expression: bright genuine smile, eyes slightly closed with joy."
+      - id: frustrated
+        prompt: "{style}. Expression: furrowed brow, tight mouth, mild annoyance."
+      - id: overloaded
+        prompt: "{style}. Expression: stressed, wide eyes, sweat drop vibe, overwhelmed."
+      - id: bored
+        prompt: "{style}. Expression: half-lidded eyes, flat mouth, uninterested."
+      - id: surprised
+        prompt: "{style}. Expression: raised brows, small o-shaped mouth, alert."
+      - id: proud
+        prompt: "{style}. Expression: confident slight smirk, chin up, satisfied."
+      - id: sad
+        prompt: "{style}. Expression: downcast eyes, subtle frown, subdued."
+
   - id: covers
     model: google/gemini-3.1-flash-image-preview
     aspect_ratio: "16:9"

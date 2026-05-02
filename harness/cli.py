@@ -441,6 +441,12 @@ def cmd_assets_list(manifest: Path | None) -> None:
     default=None,
     help="Single item SET/item_id (e.g. default/happy)",
 )
+@click.option(
+    "--char",
+    "char_id",
+    default=None,
+    help="Character id sugar for --set char_<id> (e.g. --char priya).",
+)
 @click.option("--force", is_flag=True, help="Ignore hash cache")
 @click.option("--dry-run", is_flag=True, help="Print jobs only; no API calls")
 @click.option("--secrets", type=click.Path(path_type=Path), default=None)
@@ -448,6 +454,7 @@ def cmd_assets_generate(
     manifest: Path | None,
     set_id: str | None,
     item_ref: str | None,
+    char_id: str | None,
     force: bool,
     dry_run: bool,
     secrets: Path | None,
@@ -460,7 +467,9 @@ def cmd_assets_generate(
     man_path = manifest or (root / "assets" / "manifest.yaml")
     m = load_manifest(man_path)
     jobs = plan_jobs(m, root=root)
-    jobs = filter_jobs(jobs, set_id=set_id, item_ref=item_ref)
+    if char_id and (set_id or item_ref):
+        raise click.UsageError("--char cannot be combined with --set or --item.")
+    jobs = filter_jobs(jobs, set_id=set_id, item_ref=item_ref, char_id=char_id)
     if not jobs:
         console.print("[yellow]No jobs matched filters.[/yellow]")
         raise SystemExit(1)

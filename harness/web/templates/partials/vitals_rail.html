@@ -6,6 +6,7 @@
     {% for cid, ch in characters.items() %}
     {% set v = (ch.get('vitals') or {}) %}
     {% set expr = expression_from_vitals(v) %}
+    {% set sprite_set = character_sprite_set(scenario, cid) %}
     {% set surl = sprite_url(sprite_set, expr) %}
     {% set sparks = (vitals_sparks or {}).get(cid, {}) %}
     {% set meta = (char_meta or {}).get(cid, {}) %}

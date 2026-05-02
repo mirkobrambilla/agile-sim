@@ -110,3 +110,46 @@ def test_world_from_snapshot_roundtrip(tmp_path: Path) -> None:
     w1 = world_from_snapshot(data)
     assert w1.turn == w0.turn
     assert w1.characters["a"].vitals == w0.characters["a"].vitals
+
+
+def test_run_session_resume_cursor_cancel_and_edits(tmp_path: Path) -> None:
+    async def _go() -> None:
+        bundle = load_scenario(REPO / "scenarios" / "two-devs-and-a-pm")
+        bundle.scenario["goals"]["max_turns"] = 4
+        order = ["priya", "marcus", "lin"]
+        seq: list[str] = []
+        for _ in range(4):
+            for cid in order:
+                seq.append(_agent(cid))
+            seq.append(_coach())
+        stub = StubClient(seq)
+        sess = RunSession.start(
+            scenario_dir=bundle.path,
+            runs_dir=tmp_path,
+            agent_model="stub",
+            coach_model="stub",
+            coach_mode_cli="llm",
+            coach_preset_cli=None,
+            secrets=None,
+            client=stub,
+            seed=None,
+        )
+        r1 = await sess.advance()
+        assert r1["ok"] is True
+        assert sess.last_completed_turn >= 1
+
+        restored = RunSession.from_run_dir(run_root=sess.run_root, client=stub)
+        assert restored.world.turn == sess.last_completed_turn + 1
+
+        restored.cancel()
+        r2 = await restored.advance()
+        assert r2["stop"] == "cancelled"
+
+        edit = restored.edit_vital(character_id="priya", vital_name="energy", delta=3)
+        assert edit["after"] >= edit["before"]
+        pedit = restored.edit_parameter(key="review_threshold", value="0.7")
+        assert pedit["key"] == "review_threshold"
+        rp = restored.write_reflection("note")
+        assert rp.is_file()
+
+    asyncio.run(_go())

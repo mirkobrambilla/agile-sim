@@ -21,6 +21,50 @@ class ScenarioBundle:
     process: dict[str, Any] = field(default_factory=dict)
 
 
+@dataclass
+class ScenarioMeta:
+    slug: str
+    id: str
+    name: str
+    description: str
+    path: Path
+    characters_count: int
+    channels_count: int
+    cover_url: str | None = None
+
+
+def list_scenarios(root: Path | str) -> list[ScenarioMeta]:
+    base = Path(root).resolve()
+    if not base.is_dir():
+        return []
+    out: list[ScenarioMeta] = []
+    for p in sorted(base.iterdir()):
+        if not p.is_dir():
+            continue
+        y = p / "scenario.yaml"
+        if not y.is_file():
+            continue
+        raw = yaml.safe_load(y.read_text(encoding="utf-8")) or {}
+        sid = str(raw.get("id") or p.name).strip()
+        name = str(raw.get("name") or sid or p.name).strip()
+        desc = str(raw.get("description") or "").strip()
+        cover_name = f"{sid}.png"
+        cover_url = f"/static/covers/{cover_name}" if cover_name else None
+        out.append(
+            ScenarioMeta(
+                slug=p.name,
+                id=sid,
+                name=name,
+                description=desc,
+                path=p,
+                characters_count=len(raw.get("characters") or []),
+                channels_count=len(raw.get("channels") or []),
+                cover_url=cover_url,
+            )
+        )
+    return out
+
+
 def load_scenario(scenario_dir: Path | str) -> ScenarioBundle:
     root = Path(scenario_dir).resolve()
     if not root.is_dir():

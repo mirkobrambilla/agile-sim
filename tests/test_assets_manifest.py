@@ -95,3 +95,24 @@ def test_filter_bad_item_raises() -> None:
         jobs = plan_jobs(load_manifest(mp), root=root)
         with pytest.raises(ValueError, match="SET/item"):
             filter_jobs(jobs, item_ref="nope")
+
+
+def test_filter_char_id_sugar() -> None:
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        mp = root / "m.yaml"
+        mp.write_text(
+            yaml.safe_dump(
+                {
+                    "sets": [
+                        {"id": "char_priya", "items": [{"id": "idle", "prompt": "p"}]},
+                        {"id": "default", "items": [{"id": "idle", "prompt": "d"}]},
+                    ]
+                }
+            ),
+            encoding="utf-8",
+        )
+        jobs = plan_jobs(load_manifest(mp), root=root)
+        f = filter_jobs(jobs, char_id="priya")
+        assert len(f) == 1
+        assert f[0].set_id == "char_priya"

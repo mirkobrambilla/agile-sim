@@ -25,6 +25,7 @@ from harness.scenario import ScenarioBundle, load_scenario
 from harness.world import (
     World,
     append_channel_message,
+    clamp_int,
     build_world_from_scenario,
     goal_abort,
     goal_met,
@@ -89,6 +90,8 @@ class RunSession:
     stop_reason: str | None = None
     lock: asyncio.Lock = field(default_factory=asyncio.Lock)
     last_completed_turn: int = 0
+    events: asyncio.Queue[dict[str, Any]] = field(default_factory=asyncio.Queue)
+    cancel_event: asyncio.Event = field(default_factory=asyncio.Event)
 
     @classmethod
     def start(
@@ -251,6 +254,8 @@ class RunSession:
         import time as _time
 
         finished = goal_met(world) or goal_abort(world) or world.turn > world.max_turns
+        if last_snap_turn > 0 and not finished:
+            world.turn = min(world.max_turns + 1, last_snap_turn + 1)
 
         sess = cls(
             run_id=run_root.name,
@@ -310,6 +315,12 @@ class RunSession:
                 self.stop_reason = "max_turns"
                 return {"ok": False, "error": "max turns reached"}
 
+            loop = asyncio.get_running_loop()
+            self.events.put_nowait({"kind": "advance_start", "turn": self.world.turn})
+
+            def _emit(event: dict[str, Any]) -> None:
+                loop.call_soon_threadsafe(self.events.put_nowait, event)
+
             du, stop = await asyncio.to_thread(
                 step_turn,
                 self.world,
@@ -327,12 +338,17 @@ class RunSession:
                 order=self.order,
                 verbose=False,
                 progress_prefix="",
+                on_progress=_emit,
+                should_cancel=self.cancel_event.is_set,
             )
             self.tokens_in += int(du["input_tokens"])
             self.tokens_out += int(du["output_tokens"])
             self.cost += float(du["cost"])
             summary = self._persist_summary()
 
+            if stop == "cancelled":
+                self.events.put_nowait({"kind": "advance_cancelled", "turn": self.world.turn})
+                return {"ok": True, "stop": "cancelled", "turn": self.world.turn}
             if stop in ("goal_met", "aborted_stress"):
                 self.last_completed_turn = self.world.turn
             elif self.world.turn > self.world.max_turns:
@@ -344,17 +360,20 @@ class RunSession:
                 self.finished = True
                 self.stop_reason = stop
                 self._append_run_end(summary)
+                self.events.put_nowait({"kind": "advance_stop", "turn": self.world.turn, "stop": stop})
                 return {"ok": True, "stop": stop, "turn": self.world.turn}
             if self.world.turn > self.world.max_turns:
                 self.finished = True
                 self.stop_reason = "max_turns"
                 self._append_run_end(summary)
+                self.events.put_nowait(
+                    {"kind": "advance_stop", "turn": self.world.max_turns, "stop": "max_turns"}
+                )
                 return {"ok": True, "stop": "max_turns", "turn": self.world.turn}
+            self.events.put_nowait({"kind": "advance_done", "turn": self.world.turn - 1})
             return {"ok": True, "stop": None, "turn": self.world.turn}
 
     def coach_post(self, *, channel: str, content: str, author: str = "coach") -> None:
-        if self.coach_mode != "human":
-            raise ValueError("coach posts only when coach_mode=human")
         ch = channel.strip()
         body = (content or "").strip()
         if not body:
@@ -372,6 +391,69 @@ class RunSession:
                 "content": body,
             },
         )
+
+    def cancel(self) -> None:
+        self.cancel_event.set()
+
+    def write_reflection(self, content: str) -> Path:
+        body = (content or "").strip()
+        p = self.run_root / "reflection.md"
+        p.write_text((body + "\n") if body else "", encoding="utf-8")
+        _append_jsonl(
+            self.run_root / "timeline.jsonl",
+            {"kind": "coach_reflection", "turn": self.world.turn, "chars": len(body)},
+        )
+        return p
+
+    def edit_vital(self, *, character_id: str, vital_name: str, delta: int, max_abs: int = 8) -> dict[str, Any]:
+        cid = str(character_id).strip()
+        vn = str(vital_name).strip()
+        if cid not in self.world.characters:
+            raise ValueError("unknown character")
+        if vn not in self.world.characters[cid].vitals:
+            raise ValueError("unknown vital")
+        d = max(-max_abs, min(max_abs, int(delta)))
+        before = int(self.world.characters[cid].vitals[vn])
+        after = clamp_int(before + d)
+        self.world.characters[cid].vitals[vn] = after
+        _append_jsonl(
+            self.run_root / "timeline.jsonl",
+            {
+                "kind": "coach_edit",
+                "turn": self.world.turn,
+                "target": "vital",
+                "character_id": cid,
+                "vital_name": vn,
+                "delta": d,
+                "before": before,
+                "after": after,
+                "effective_turn": self.world.turn + 1,
+            },
+        )
+        self._persist_summary()
+        return {"character_id": cid, "vital_name": vn, "before": before, "after": after, "delta": d}
+
+    def edit_parameter(self, *, key: str, value: Any) -> dict[str, Any]:
+        params = self.bundle.scenario.setdefault("parameters", {})
+        if not isinstance(params, dict):
+            self.bundle.scenario["parameters"] = {}
+            params = self.bundle.scenario["parameters"]
+        k = str(key).strip()
+        before = params.get(k)
+        params[k] = value
+        _append_jsonl(
+            self.run_root / "timeline.jsonl",
+            {
+                "kind": "coach_edit",
+                "turn": self.world.turn,
+                "target": "parameter",
+                "key": k,
+                "before": before,
+                "after": value,
+                "effective_turn": self.world.turn + 1,
+            },
+        )
+        return {"key": k, "before": before, "after": value}
 
 
 SESSIONS: dict[str, RunSession] = {}

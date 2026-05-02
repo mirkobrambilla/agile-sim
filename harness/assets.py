@@ -202,6 +202,7 @@ def filter_jobs(
     *,
     set_id: str | None = None,
     item_ref: str | None = None,
+    char_id: str | None = None,
 ) -> list[AssetJob]:
     """item_ref format: ``set_id/item_id`` (e.g. default/happy)."""
 
@@ -212,6 +213,9 @@ def filter_jobs(
             raise ValueError("--item must be SET/item_id, e.g. default/happy")
         sid, iid = parts[0].strip(), parts[1].strip()
         out = [j for j in out if j.set_id == sid and j.item_id == iid]
+    elif char_id:
+        sid = f"char_{char_id.strip()}"
+        out = [j for j in out if j.set_id == sid]
     elif set_id:
         out = [j for j in out if j.set_id == set_id.strip()]
     return out

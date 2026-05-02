@@ -21,4 +21,18 @@
     </ul>
   </div>
   {% endif %}
+  <form
+    class="panel panel-section flex flex-col gap-2"
+    hx-post="/runs/{{ bundle.url_path }}/edit/parameter"
+    hx-target="#inspector-param-status"
+    hx-swap="innerHTML"
+  >
+    <h4 class="text-xs font-bold uppercase text-[var(--color-text-muted)]">Scenario parameter edit</h4>
+    <div class="flex gap-2">
+      <input name="key" placeholder="parameter_key" class="flex-1 text-xs border border-[var(--color-border)] rounded-[var(--radius-sm)] p-1 bg-[var(--color-bg-panel)]" />
+      <input name="value" placeholder="value" class="flex-1 text-xs border border-[var(--color-border)] rounded-[var(--radius-sm)] p-1 bg-[var(--color-bg-panel)]" />
+      <button type="submit" class="btn btn-ghost text-xs">Apply</button>
+    </div>
+    <div id="inspector-param-status" class="text-[0.7rem] text-[var(--color-text-muted)]">applied — takes effect at turn N+1</div>
+  </form>
 </div>

@@ -8,6 +8,7 @@
     {% for cid, ch in characters.items() %}
     {% set v = (ch.get('vitals') or {}) %}
     {% set expr = expression_from_vitals(v) %}
+    {% set sprite_set = character_sprite_set(scenario, cid) %}
     {% set surl = sprite_url(sprite_set, expr) %}
     {% set meta = (char_meta or {}).get(cid, {}) %}
     <div class="panel panel-section flex flex-col items-center gap-2 p-3">

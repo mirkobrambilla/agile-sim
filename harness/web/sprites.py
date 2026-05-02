@@ -10,6 +10,11 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _sprite_set_exists(set_id: str) -> bool:
+    p = repo_root() / "harness" / "web" / "static" / "sprites" / set_id
+    return p.is_dir()
+
+
 def sprite_png_exists(set_id: str, expression: str) -> bool:
     p = repo_root() / "harness" / "web" / "static" / "sprites" / set_id
     if not p.is_dir():
@@ -27,6 +32,26 @@ def sprite_url(set_id: str, expression: str) -> str | None:
         if f.is_file():
             return f"/static/sprites/{set_id}/{expression}{ext}"
     return None
+
+
+def character_sprite_set(scenario: dict[str, Any], char_id: str) -> str:
+    """Resolve sprite set for a character with a safe fallback chain."""
+
+    cid = str(char_id).strip()
+    if not cid:
+        return "default"
+
+    for c in scenario.get("characters") or []:
+        if str(c.get("id", "")).strip() == cid:
+            explicit = str(c.get("sprite_set") or "").strip()
+            if explicit:
+                return explicit
+            break
+
+    guessed = f"char_{cid}"
+    if _sprite_set_exists(guessed):
+        return guessed
+    return "default"
 
 
 def expression_from_vitals(vitals: dict[str, Any]) -> str:

@@ -10,32 +10,47 @@
 {% set scen = scenario if scenario is defined else {} %}
 <div
   class="flex flex-col min-h-screen relative"
-  x-data="runnerShell({ liveTurn: {{ live_turn }}, viewingTurn: {{ effective_turn }}, defaultView: 'channels' })"
+  x-data="runnerShell({ liveTurn: {{ live_turn }}, viewingTurn: {{ effective_turn }}, defaultView: 'channels', channels: {{ bundle.channels|map(attribute='id')|list|tojson }}, currentChannel: {{ channel_query|tojson }}, attention: {{ channel_attention|tojson }} })"
 >
-  {% if viewing_replay %}
-  <div class="banner-replay shrink-0 flex flex-wrap items-center justify-between gap-2">
-    <span>Viewing turn {{ effective_turn }} (latest completed in this tab is {{ live_turn }})</span>
-    <a class="underline font-semibold" href="/runs/{{ bundle.url_path }}">Return to latest</a>
-  </div>
-  {% endif %}
   <header class="topbar shrink-0">
-    <div class="flex flex-wrap items-center gap-3 px-4 py-3">
+    <div class="runner-topbar-inner">
       <a href="/" class="text-sm text-[var(--color-text-muted)] hover:underline">← All runs</a>
       <h1 class="text-base font-bold font-[family-name:var(--font-mono)]">{{ bundle.run_dir.name }}</h1>
       {% if scen.get('id') %}
       <span class="topbar-chip text-[var(--color-text-muted)]">scenario <span class="font-mono text-[var(--color-text)]">{{ scen.get('id') }}</span></span>
       {% endif %}
-      <label class="flex items-center gap-2 text-sm">
-        <span class="text-[var(--color-text-muted)]">Turn</span>
-        <select
-          class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-1 bg-[var(--color-bg-panel)]"
-          @change="window.location.href = $event.target.value"
-        >
-          {% for t in range(1, max_turn + 1) %}
-          <option value="/runs/{{ bundle.url_path }}/at/{{ t }}" {% if t == effective_turn %}selected{% endif %}>{{ t }}</option>
-          {% endfor %}
-        </select>
-      </label>
+      {% set latest_turn = live_turn if live_turn is defined else max_turn %}
+      {% set latest_turn = latest_turn if latest_turn <= max_turn else max_turn %}
+      {% set prev_turn = effective_turn - 1 if effective_turn > 1 else 1 %}
+      {% set next_turn = effective_turn + 1 if effective_turn < latest_turn else latest_turn %}
+      {% if latest_turn <= 5 %}
+        {% set start_turn = 1 %}
+        {% set end_turn = latest_turn %}
+      {% else %}
+        {% set start_turn = effective_turn - 1 %}
+        {% if start_turn < 1 %}{% set start_turn = 1 %}{% endif %}
+        {% if start_turn > latest_turn - 3 %}{% set start_turn = latest_turn - 3 %}{% endif %}
+        {% set end_turn = start_turn + 3 %}
+      {% endif %}
+      <nav class="turn-nav" aria-label="Turn navigation">
+        <a class="turn-nav__arrow" href="/runs/{{ bundle.url_path }}/at/{{ prev_turn }}" title="Previous turn" aria-label="Previous turn">←</a>
+        {% for t in range(start_turn, end_turn + 1) %}
+        <a
+          class="turn-nav__pill {% if t == effective_turn %}turn-nav__pill--active{% endif %}"
+          href="/runs/{{ bundle.url_path }}/at/{{ t }}"
+          aria-current="{% if t == effective_turn %}page{% else %}false{% endif %}"
+        >{{ t }}</a>
+        {% endfor %}
+        {% if end_turn < latest_turn %}
+        <span class="turn-nav__dots">…</span>
+        <a
+          class="turn-nav__pill {% if latest_turn == effective_turn %}turn-nav__pill--active{% endif %}"
+          href="/runs/{{ bundle.url_path }}/at/{{ latest_turn }}"
+          aria-current="{% if latest_turn == effective_turn %}page{% else %}false{% endif %}"
+        >{{ latest_turn }}</a>
+        {% endif %}
+        <a class="turn-nav__arrow" href="/runs/{{ bundle.url_path }}/at/{{ next_turn }}" title="Next turn" aria-label="Next turn">→</a>
+      </nav>
       {% if goal_status == 'ok' %}
       <span class="stoplight stoplight--ok">On track</span>
       {% elif goal_status == 'fail' %}
@@ -51,46 +66,71 @@
         {% endfor %}
       </span>
       {% endif %}
-      <span class="topbar-chip">{{ effective_turn }} / {{ max_turn }}</span>
-      <span class="chip ml-auto">
-        Cost
+      <div class="runner-topbar-actions">
+      <span class="text-xs text-[var(--color-text-muted)]">turn {{ effective_turn }} / {{ max_turn }}</span>
+      <span class="chip">
+        Cost:
         {% if cost is not none %}
         ${{ '%.4f'|format(cost) }}
         {% else %}—{% endif %}
       </span>
       {% if live_session %}
-      <form hx-post="/runs/{{ bundle.url_path }}/advance" hx-swap="none" class="inline">
-        <button type="submit" class="btn btn-primary text-sm">Advance turn</button>
+      <form
+        hx-post="/runs/{{ bundle.url_path }}/advance"
+        hx-swap="none"
+        hx-indicator="#advance-indicator"
+        hx-on::before-request="advanceBusy = true; progressText = 'Running turn...';"
+        hx-on::after-request="advanceBusy = false; if (event.detail.successful) { progressText = 'Turn complete'; window.location.href = '/runs/{{ bundle.url_path }}'; } else { progressText = 'Advance failed'; }"
+        class="inline-flex items-center gap-2"
+      >
+        <button type="submit" class="btn btn-primary text-sm" :disabled="advanceBusy">Advance turn</button>
+        <span id="advance-indicator" class="htmx-indicator chip text-xs">processing...</span>
       </form>
       {% endif %}
+      <button type="button" class="btn btn-ghost text-xs" @click="devPanelOpen = !devPanelOpen">Dev</button>
+      </div>
     </div>
+    {% if live_session %}
+    <div
+      class="px-4 pb-2 text-[0.7rem] text-[var(--color-text-muted)]"
+      hx-ext="sse"
+      sse-connect="/runs/{{ bundle.url_path }}/events"
+      sse-swap="progress"
+    >
+      <span id="sse-progress" x-text="progressText"></span>
+    </div>
+    {% endif %}
   </header>
 
   <div class="flex flex-1 min-h-0">
-    <aside class="app-rail w-12 shrink-0 flex flex-col items-center py-4 gap-3">
-      <a href="/" class="text-lg" title="Home">🏠</a>
-      <a href="/new" class="text-lg" title="New live run">＋</a>
-      <span class="text-lg opacity-40" title="Runner">▶</span>
+    <aside class="app-rail w-14 shrink-0 flex flex-col items-center py-4 gap-3">
+      <a href="/" class="app-rail__icon" title="Home" aria-label="Home">HM</a>
+      <a href="/new" class="app-rail__icon" title="New live run" aria-label="New live run">NR</a>
+      <span class="app-rail__icon app-rail__icon--active" title="Runner" aria-hidden="true">RN</span>
     </aside>
 
     <aside class="left-rail w-52 shrink-0 flex flex-col py-4 gap-4 overflow-y-auto">
       <div>
-        <h2 class="px-3 text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Channels</h2>
+        <h2 class="left-rail__section-title px-3 mb-2">Channels</h2>
         <nav class="flex flex-col gap-1 px-2">
           {% for c in bundle.channels %}
+          {% set active_channel = (c.id == channel_query) %}
           <button
             type="button"
-            class="btn btn-ghost justify-start text-left text-sm {% if c.id == channel_query %}border-[var(--color-accent)]{% endif %}"
+            class="btn btn-ghost left-rail__btn justify-start text-left text-sm {% if active_channel %}left-rail__btn--active{% endif %}"
             hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ c.id|urlencode }}&turn={{ effective_turn }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
-            @click="setView('channels')"
-          >{{ c.label }}</button>
+            @click="setView('channels'); setChannel('{{ c.id }}')"
+          >
+            <span class="channel-attention-dot" x-show="channelAttention && channelAttention['{{ c.id }}']"></span>
+            {{ c.label }}
+          </button>
           {% endfor %}
         </nav>
       </div>
       <div>
-        <h2 class="px-3 text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">Views</h2>
+        <h2 class="left-rail__section-title px-3 mb-2">Views</h2>
         <nav class="flex flex-col gap-1 px-2">
           <button
             type="button"
@@ -150,6 +190,21 @@
         {% set characters = (snap_world.get('characters') or {}) if snap_world else {} %}
         {% include "partials/vitals_rail.html" %}
       </div>
+      {% if live_session %}
+      <form
+        class="panel panel-section flex flex-col gap-2"
+        hx-post="/runs/{{ bundle.url_path }}/reflection"
+        hx-target="#reflection-status"
+        hx-swap="innerHTML"
+      >
+        <label class="text-xs font-semibold text-[var(--color-text-muted)]">Coach reflection</label>
+        <textarea name="content" rows="4" class="w-full text-xs border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" placeholder="Notes for next turn or post-run debrief..."></textarea>
+        <div class="flex items-center justify-between gap-2">
+          <button type="submit" class="btn btn-ghost text-xs">Save</button>
+          <span id="reflection-status" class="text-[0.7rem] text-[var(--color-text-muted)]"></span>
+        </div>
+      </form>
+      {% endif %}
     </aside>
   </div>
 
@@ -169,6 +224,13 @@
       <div id="inspector-body" class="text-sm text-[var(--color-text)]">
         <p class="text-[var(--color-text-muted)] text-xs">Click “inspect” on goals, vitals, roster, or “Inspect channel”.</p>
       </div>
+    </aside>
+  </div>
+
+  <div class="inspector-drawer fixed inset-0 z-50 flex flex-row" x-show="devPanelOpen" x-cloak x-transition>
+    <button type="button" class="flex-1 min-w-0 bg-black/25 cursor-default" aria-label="Close dev panel" @click="devPanelOpen = false"></button>
+    <aside class="pointer-events-auto w-full max-w-lg h-full overflow-y-auto p-4 bg-[var(--color-bg-panel)] border-l border-[var(--color-border)] shadow-xl">
+      {% include "partials/dev_panel.html" %}
     </aside>
   </div>
 </div>

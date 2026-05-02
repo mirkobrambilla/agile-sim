@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, field
 from typing import Any
 from uuid import uuid4
@@ -73,8 +74,62 @@ class World:
         return got[-limit:]
 
 
+_MENTION_RE = re.compile(r"@([A-Za-z][A-Za-z0-9_-]{0,31})")
+
+
+def parse_mentions(text: str, known_ids: set[str] | list[str]) -> list[str]:
+    """Extract `@handle` mentions resolving to known character ids.
+
+    Handles match `@<id>` (case-insensitive against `known_ids`). Returns ids in
+    appearance order, deduplicated. Coach is not addressable as a mention.
+    """
+
+    ids = {str(x).strip().lower() for x in known_ids if str(x).strip()}
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in _MENTION_RE.findall(text or ""):
+        cid = raw.strip().lower()
+        if cid in ids and cid not in seen:
+            out.append(cid)
+            seen.add(cid)
+    return out
+
+
+def mentions_for_character(
+    world: World,
+    char_id: str,
+    known_ids: set[str] | list[str],
+    *,
+    recent_turns: int = 3,
+    limit: int = 8,
+) -> list[Message]:
+    """Messages from the last `recent_turns` (inclusive of current) that @-mention `char_id`.
+
+    Mentions guarantee next-turn delivery regardless of channel volume (F-CM5).
+    Skips messages the agent itself authored. DMs not addressed to this agent
+    are excluded (they are still private to their owner).
+    """
+
+    cid = str(char_id).strip().lower()
+    if not cid:
+        return []
+    cutoff = max(0, world.turn - recent_turns)
+    out: list[Message] = []
+    for m in world.messages:
+        if m.turn < cutoff:
+            continue
+        if str(m.author).strip().lower() == cid:
+            continue
+        ch = m.channel
+        if ch.startswith("dm/") and ch[3:].strip().lower() != cid:
+            continue
+        if cid in parse_mentions(m.content, known_ids):
+            out.append(m)
+    return out[-limit:]
+
+
 def format_agent_inbox(world: World, char_id: str, primary_channel: str) -> str:
-    """Team channel + private coach DM thread for this character."""
+    """Team channel + private coach DM thread + guaranteed-mentions for this character."""
 
     dm_ch = f"dm/{char_id}"
     team_msgs = world.recent_channel_messages(primary_channel, limit=12)
@@ -87,6 +142,23 @@ def format_agent_inbox(world: World, char_id: str, primary_channel: str) -> str:
     if team_msgs:
         lines = [f"- @{m.author} (turn {m.turn}): {m.content}" for m in team_msgs]
         blocks.append(f"### Team channel {primary_channel}\n" + "\n".join(lines))
+
+    known_ids = set(world.characters.keys())
+    in_primary_dm = {(m.channel, m.id) for m in team_msgs} | {(m.channel, m.id) for m in dm_msgs}
+    extra_mentions = [
+        m
+        for m in mentions_for_character(world, char_id, known_ids, recent_turns=3, limit=8)
+        if (m.channel, m.id) not in in_primary_dm
+    ]
+    if extra_mentions:
+        lines = [
+            f"- @{m.author} (turn {m.turn}) [{m.channel}]: {m.content}"
+            for m in extra_mentions
+        ]
+        blocks.append(
+            "### Mentions (other channels — you were @-mentioned)\n" + "\n".join(lines)
+        )
+
     if not blocks:
         return "(no messages yet)"
     return "\n\n".join(blocks)
