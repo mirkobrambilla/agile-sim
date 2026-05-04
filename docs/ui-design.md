@@ -60,7 +60,7 @@ There is also an implicit fourth: the **replay viewer**, which is just the runne
 
 A familiar four-zone shape, like a vintage chat app:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Top bar: <sim name>  · turn 12 / day  · 🟢 on track  · 💰 cost  · [advance] │
 ├───┬──────────────┬───────────────────────────────────┬──────────────────────┤
@@ -169,7 +169,7 @@ Each character ships with a small **sprite set** of expressions:
 
 Expressions are **derived deterministically from vitals and recent context** (no extra LLM call). A simple rule table:
 
-```
+```text
 stress > 80                → overloaded
 motivation < 25            → bored
 recent vital_self_report
@@ -207,7 +207,7 @@ Goal/exit panels, per-team load headers, and big org metrics use these. Same thr
 ### Colour, type, density
 
 - **Palette**: vintage-Teams base (cool blues, light greys, white) with bright accent colours from a JRPG palette (warm reds, golds, teals) used for characters, teams, and stoplight states. High-saturation but used sparingly.
-- **Type**: one readable sans for UI (era-appropriate, e.g. something Verdana-ish) plus a small bitmap/pixel font for HUD-style indicators (vital values, turn counter). Mono for the dev/debug panel and markdown editor.
+- **Type**: one readable sans for UI (Verdana/Tahoma family) plus a small bitmap/pixel font for HUD-style indicators (vital values, turn counter). The web bundle ships `Silkscreen` locally and maps it to `--font-pixel`. Mono for the dev/debug panel and markdown editor.
 - **Density**: roomy by default. The right rail is the densest surface; channels are spacious like Teams.
 
 ## Interaction patterns
@@ -304,9 +304,6 @@ Buttons / links at the bottom:
 The summary and the final report are generated together by the Summary loop when the run ends. Both are persisted; either can be re-generated on demand (e.g. after the best-practices library is tuned), with the original preserved as a snapshot. Costs are recorded under the run's totals.
 
 If the summary call fails or is skipped (e.g. no API access), the UI shows the dashboard sections populated from deterministic data only — outcome banner, character arcs (vitals only, no generated narrative), metrics charts, run stats — and the Final Report section displays a "not generated" notice with a retry button.
-
-
-
 A toggle (e.g. `D`) opens a dev panel:
 
 - **Prompt inspector** — for any agent, see the exact prompt sent on any turn and the raw response. Diff between turns.
@@ -329,7 +326,7 @@ Goals: avoid npm hell, stay lightweight, lean on browser-native HTML, reach for 
 
 ### Small vanilla libraries we'll add as needed
 
-- **EasyMDE** or **SimpleMDE** — markdown editor with preview and full-screen.
+- **EasyMDE** — markdown editor with preview, syntax highlighting, and full-screen. Vendored under `harness/web/static/vendor/easymde/` (no CDN dependency at runtime).
 - **SortableJS** — drag-and-drop for the kanban.
 - **Apache ECharts** (or **Chart.js**) — sparklines, gauges, progress bars beyond what CSS gives us.
 - **TomSelect** or similar — `@handle` autocomplete in channel inputs.

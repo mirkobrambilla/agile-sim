@@ -1,0 +1,64 @@
+<div class="panel panel-section max-w-5xl">
+  <div class="flex items-center justify-between gap-2 mb-2">
+    <h2 class="text-base font-semibold">Channels</h2>
+    {% if message %}<span class="chip text-xs">{{ message }}</span>{% endif %}
+  </div>
+  {% if error %}<p class="text-xs text-[var(--color-fail)] mb-2">{{ error }}</p>{% endif %}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs text-[var(--color-text-muted)]">
+          <th class="py-1">Name</th><th>Type</th><th>Coach</th><th>Members</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ch in scenario.get('channels') or [] %}
+        <tr class="border-t border-[var(--color-border)]">
+          <td class="py-2 font-mono">{{ ch.get('name') }}</td>
+          <td>{{ ch.get('type','open') }}</td>
+          <td>{{ ch.get('coach_engagement','post') }}</td>
+          <td>{{ (ch.get('member_ids') or [])|join(', ') }}</td>
+          <td class="text-right">
+            <form hx-post="/scenarios/{{ slug|urlencode }}/channel/delete" hx-target="#scenario-center-stage" hx-swap="innerHTML">
+              <input type="hidden" name="name" value="{{ ch.get('name') }}" />
+              <button type="submit" class="btn btn-ghost text-xs">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form class="panel panel-section mt-4 grid grid-cols-1 md:grid-cols-5 gap-2 items-end"
+        hx-post="/scenarios/{{ slug|urlencode }}/edit/channel"
+        hx-target="#scenario-center-stage"
+        hx-swap="innerHTML">
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">Name</label>
+      <input name="name" placeholder="#team" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">Type</label>
+      <select name="type" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]">
+        <option value="open">open</option><option value="group">group</option><option value="event">event</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">Coach</label>
+      <select name="coach_engagement" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]">
+        <option value="post">post</option><option value="read">read</option><option value="none">none</option>
+      </select>
+    </div>
+    <div class="md:col-span-2">
+      <label class="text-xs text-[var(--color-text-muted)]">Members (multi-select)</label>
+      <select name="member_ids" multiple class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)] min-h-[5rem]">
+        {% for c in scenario.get('characters') or [] %}
+        <option value="{{ c.get('id') }}">{{ c.get('id') }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-5">
+      <button type="submit" class="btn btn-primary text-sm">Save channel</button>
+    </div>
+  </form>
+</div>

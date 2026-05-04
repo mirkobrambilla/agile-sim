@@ -1,0 +1,26 @@
+<div class="panel panel-section max-w-4xl">
+  <div class="flex items-center justify-between gap-2 mb-2">
+    <h2 class="text-base font-semibold">Parameters</h2>
+    {% if message %}<span class="chip text-xs">{{ message }}</span>{% endif %}
+  </div>
+  {% if error %}<p class="text-xs text-[var(--color-fail)] mb-2">{{ error }}</p>{% endif %}
+  {% set params = scenario.get('parameters') or {} %}
+  <form class="flex flex-col gap-2"
+        hx-post="/scenarios/{{ slug|urlencode }}/edit/parameters"
+        hx-target="#scenario-center-stage"
+        hx-swap="innerHTML">
+    {% if params %}
+      {% for key, value in params.items() %}
+      <div class="grid grid-cols-[1fr_1fr] gap-2">
+        <input name="param_keys" value="{{ key }}" class="text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+        <input name="param_values" value="{{ value }}" class="text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+      </div>
+      {% endfor %}
+    {% endif %}
+    <div class="grid grid-cols-[1fr_1fr] gap-2">
+      <input name="param_keys" placeholder="new_key" class="text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+      <input name="param_values" placeholder="new value" class="text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <button type="submit" class="btn btn-primary text-sm self-start">Save parameters</button>
+  </form>
+</div>

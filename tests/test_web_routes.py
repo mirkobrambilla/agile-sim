@@ -91,13 +91,16 @@ def test_ambiguous_top_level_prefix_returns_helpful_json(tmp_path: Path) -> None
     assert "155006Z" in body["detail"] or "155040Z" in body["detail"]
 
 
-def test_picker_home(tmp_path: Path) -> None:
+def test_home_landing_and_runs_picker(tmp_path: Path) -> None:
     _seed_run(tmp_path)
     app = create_app(runs_dir=tmp_path)
     c = TestClient(app)
-    r = c.get("/")
-    assert r.status_code == 200
-    assert "run_web" in r.text
+    home = c.get("/")
+    assert home.status_code == 200
+    assert "This landing page is a placeholder" in home.text
+    runs = c.get("/runs")
+    assert runs.status_code == 200
+    assert "run_web" in runs.text
 
 
 def test_channel_renders_mention_links(tmp_path: Path) -> None:
@@ -146,7 +149,7 @@ def test_scenarios_routes(tmp_path: Path) -> None:
     assert "Scenarios" in idx.text
     one = c.get("/scenarios/two-devs-and-a-pm")
     assert one.status_code == 200
-    assert "fork to edit" in one.text.lower()
+    assert "make a copy" in one.text.lower()
 
 
 def test_live_edit_and_reflection_endpoints(tmp_path: Path) -> None:

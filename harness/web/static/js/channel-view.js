@@ -14,14 +14,16 @@ function channelView(_opts) {
   };
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  _scrollChannelMessagesToBottom(document);
-});
+if (typeof document !== "undefined" && document && document.addEventListener) {
+  document.addEventListener("DOMContentLoaded", () => {
+    _scrollChannelMessagesToBottom(document);
+  });
 
-document.body.addEventListener("htmx:afterSwap", (evt) => {
-  const target = evt.detail && evt.detail.target;
-  if (!target) return;
-  if (target.id === "center-stage" || target.querySelector("[data-channel-messages='true']")) {
-    _scrollChannelMessagesToBottom(target);
-  }
-});
+  document.addEventListener("htmx:afterSwap", (evt) => {
+    const target = evt.detail && evt.detail.target;
+    if (!target) return;
+    if (target.id === "center-stage" || target.querySelector("[data-channel-messages='true']")) {
+      _scrollChannelMessagesToBottom(target);
+    }
+  });
+}

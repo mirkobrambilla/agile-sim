@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}agile-sim{% endblock %}
+{% block body %}
+{% set header_title = "agile-sim" %}
+{% set header_subtitle = "Simulation harness for scenario runs, edits, and experiment review." %}
+{% include "partials/site_header.html" %}
+
+<main class="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
+  <section class="panel panel-section">
+    <h2 class="text-base font-semibold mb-2">Welcome</h2>
+    <p class="text-sm text-[var(--color-text-muted)]">
+      This landing page is a placeholder while we define the longer-term home experience.
+      Use the quick links below to get to active workflows.
+    </p>
+  </section>
+
+  <section class="home-quick-actions">
+    <a href="/runs" class="home-action-card">
+      <div class="home-action-card__title">Runs</div>
+      <div class="home-action-card__desc">Open run and batch outputs.</div>
+    </a>
+    <a href="/new" class="home-action-card">
+      <div class="home-action-card__title">New run</div>
+      <div class="home-action-card__desc">Start a live simulation.</div>
+    </a>
+    <a href="/scenarios" class="home-action-card">
+      <div class="home-action-card__title">Scenarios</div>
+      <div class="home-action-card__desc">Inspect and edit scenario definitions.</div>
+    </a>
+    <a href="/experiments" class="home-action-card">
+      <div class="home-action-card__title">Experiments</div>
+      <div class="home-action-card__desc">Review batch-level comparisons.</div>
+    </a>
+  </section>
+</main>
+{% endblock %}

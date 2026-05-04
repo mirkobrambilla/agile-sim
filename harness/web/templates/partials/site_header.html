@@ -1,0 +1,62 @@
+{% set _maxw = header_max_width if header_max_width is defined else "max-w-6xl" %}
+{% set _title = header_title if header_title is defined else "agile-sim" %}
+{% set _subtitle = header_subtitle if header_subtitle is defined else "" %}
+{% set _back_href = header_back_href if header_back_href is defined else "" %}
+{% set _back_label = header_back_label if header_back_label is defined else "" %}
+{% set _show_new_run = header_show_new_run if header_show_new_run is defined else true %}
+{% set _show_new_scenario = header_show_new_scenario if header_show_new_scenario is defined else true %}
+{% set _show_runs_dir = header_show_runs_dir if header_show_runs_dir is defined else false %}
+<header class="topbar sticky top-0 z-10">
+  <div class="runner-topbar-inner {{ _maxw }} mx-auto w-full">
+    <div class="topbar-nav-mobile relative" x-data="{ navMenuOpen: false }">
+      <button
+        type="button"
+        class="hamburger-btn"
+        @click="navMenuOpen = !navMenuOpen"
+        :aria-expanded="navMenuOpen ? 'true' : 'false'"
+        aria-label="Open navigation menu"
+      >☰</button>
+      <nav class="nav-popover" x-show="navMenuOpen" x-cloak @click.outside="navMenuOpen = false">
+        {% if _back_href and _back_label %}
+        <a href="{{ _back_href }}" class="nav-popover__item">{{ _back_label }}</a>
+        {% endif %}
+        <a href="/" class="nav-popover__item">Home</a>
+        <a href="/runs" class="nav-popover__item">Runs</a>
+        <a href="/scenarios" class="nav-popover__item">Scenarios</a>
+        <a href="/experiments" class="nav-popover__item">Experiments</a>
+        {% if _show_new_run %}
+        <a href="/new" class="nav-popover__item">New run</a>
+        {% endif %}
+        {% if _show_new_scenario %}
+        <a href="/scenarios/new" class="nav-popover__item">New scenario</a>
+        {% endif %}
+      </nav>
+    </div>
+    {% if _back_href and _back_label %}
+    <a href="{{ _back_href }}" class="topbar-back-link text-sm">{{ _back_label }}</a>
+    {% endif %}
+    <div class="min-w-0">
+      <h1 class="text-lg font-bold truncate">{{ _title }}</h1>
+      {% if _subtitle %}
+      <p class="topbar-meta mt-1">{{ _subtitle }}</p>
+      {% endif %}
+    </div>
+    <nav class="topbar-nav-desktop">
+      <a href="/" class="nav-link text-sm">Home</a>
+      <a href="/runs" class="nav-link text-sm">Runs</a>
+      <a href="/scenarios" class="nav-link text-sm">Scenarios</a>
+      <a href="/experiments" class="nav-link text-sm">Experiments</a>
+    </nav>
+    <div class="runner-topbar-actions topbar-actions-desktop">
+      {% if _show_new_run %}
+      <a href="/new" class="btn btn-ghost text-sm">New run</a>
+      {% endif %}
+      {% if _show_new_scenario %}
+      <a href="/scenarios/new" class="btn btn-primary text-sm">New scenario</a>
+      {% endif %}
+      {% if _show_runs_dir and runs_dir is defined %}
+      <p class="topbar-meta"><code class="font-[family-name:var(--font-mono)]">{{ runs_dir }}</code></p>
+      {% endif %}
+    </div>
+  </div>
+</header>

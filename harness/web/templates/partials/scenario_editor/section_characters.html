@@ -1,0 +1,60 @@
+<div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-4 max-w-6xl">
+  <section class="panel panel-section">
+    <div class="flex items-center justify-between gap-2 mb-3">
+      <h2 class="text-base font-semibold">Characters</h2>
+      {% if message %}
+      <span class="chip text-xs">{{ message }}</span>
+      {% endif %}
+    </div>
+    {% if error %}
+    <div class="text-xs text-[var(--color-fail)] mb-3">{{ error }}</div>
+    {% endif %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {% for c in scenario.get('characters') or [] %}
+      {% set cid = c.get('id') %}
+      <article class="panel panel-section">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="font-semibold">{{ c.get('name', cid) }}</div>
+            <div class="text-xs text-[var(--color-text-muted)] font-mono">{{ cid }}</div>
+            <div class="text-xs text-[var(--color-text-muted)] mt-1">{{ c.get('role', '—') or '—' }}</div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-ghost text-xs"
+            hx-get="/partials/scenario/{{ slug|urlencode }}/inspector/character/{{ cid|urlencode }}"
+            hx-target="#scenario-character-inspector"
+            hx-swap="innerHTML"
+          >Edit</button>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    <form
+      class="panel panel-section mt-4 flex items-end gap-2"
+      hx-post="/scenarios/{{ slug|urlencode }}/character/new"
+      hx-target="#scenario-center-stage"
+      hx-swap="innerHTML"
+    >
+      <div class="flex-1">
+        <label class="text-xs text-[var(--color-text-muted)]">ID</label>
+        <input name="id" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" placeholder="new_character_id" />
+      </div>
+      <div class="flex-1">
+        <label class="text-xs text-[var(--color-text-muted)]">Name</label>
+        <input name="name" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" placeholder="Display name" />
+      </div>
+      <button type="submit" class="btn btn-primary text-sm">Add</button>
+    </form>
+  </section>
+
+  <aside id="scenario-character-inspector" class="panel panel-section">
+    {% if selected_character_id %}
+    <div class="text-sm text-[var(--color-text-muted)]">Loading {{ selected_character_id }}…</div>
+    {% else %}
+    <h3 class="text-sm font-semibold mb-2">Character inspector</h3>
+    <p class="text-xs text-[var(--color-text-muted)]">Select a character card to edit profile, vitals, and backstory.</p>
+    {% endif %}
+  </aside>
+</div>

@@ -1,0 +1,47 @@
+<div class="panel panel-section max-w-5xl">
+  <div class="flex items-center justify-between gap-2 mb-2">
+    <h2 class="text-base font-semibold">Goals</h2>
+    {% if message %}<span class="chip text-xs">{{ message }}</span>{% endif %}
+  </div>
+  {% if error %}<p class="text-xs text-[var(--color-fail)] mb-2">{{ error }}</p>{% endif %}
+  {% set g = scenario.get('goals') or {} %}
+  {% set work_ids = (scenario.get('work_items') or [])|map(attribute='id')|list %}
+  <form class="grid grid-cols-1 md:grid-cols-3 gap-2"
+        hx-post="/scenarios/{{ slug|urlencode }}/edit/goals"
+        hx-target="#scenario-center-stage"
+        hx-swap="innerHTML">
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">max_turns</label>
+      <input name="max_turns" value="{{ g.get('max_turns','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">max_stress_any</label>
+      <input name="max_stress_any" value="{{ g.get('max_stress_any','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">abort_stress_any</label>
+      <input name="abort_stress_any" value="{{ g.get('abort_stress_any','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">min_done_work_items</label>
+      <input name="min_done_work_items" value="{{ g.get('min_done_work_items','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">per_team_min_done</label>
+      <input name="per_team_min_done" value="{{ g.get('per_team_min_done','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div class="md:col-span-3">
+      <label class="text-xs text-[var(--color-text-muted)]">require_done_ids</label>
+      <select name="require_done_ids" multiple class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)] min-h-[6rem]">
+        {% set selected = g.get('require_done_ids') or [] %}
+        {% for wi in scenario.get('work_items') or [] %}
+        {% set wid = wi.get('id') %}
+        <option value="{{ wid }}" {% if wid in selected %}selected{% endif %}>{{ wid }} — {{ wi.get('title','') }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-3">
+      <button type="submit" class="btn btn-primary text-sm">Save goals</button>
+    </div>
+  </form>
+</div>

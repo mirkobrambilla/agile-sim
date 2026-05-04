@@ -22,7 +22,18 @@
     <dt class="text-[var(--color-text-muted)]">Final turn</dt><dd>{{ bundle.summary.get('final_turn') }}</dd>
     <dt class="text-[var(--color-text-muted)]">Work done</dt><dd>{{ bundle.summary.get('work_done') }}</dd>
     <dt class="text-[var(--color-text-muted)]">Aborted (stress)</dt><dd>{{ bundle.summary.get('aborted_stress') }}</dd>
+    <dt class="text-[var(--color-text-muted)]">Coach mode</dt><dd>{{ bundle.summary.get('coach_mode') or bundle.meta.get('coach_mode') or '—' }}</dd>
+    <dt class="text-[var(--color-text-muted)]">Input tokens</dt><dd>{{ summary_totals.get('input_tokens', '—') }}</dd>
+    <dt class="text-[var(--color-text-muted)]">Output tokens</dt><dd>{{ summary_totals.get('output_tokens', '—') }}</dd>
+    <dt class="text-[var(--color-text-muted)]">Elapsed (s)</dt><dd>{{ summary_totals.get('elapsed_s', '—') }}</dd>
+    <dt class="text-[var(--color-text-muted)]">Cost (USD)</dt><dd>{{ summary_totals.get('cost', '—') }}</dd>
   </dl>
+  {% if summary_org %}
+  <div class="panel panel-section text-xs">
+    <h3 class="text-sm font-semibold mb-2">Org outcomes</h3>
+    <pre class="font-[family-name:var(--font-mono)] whitespace-pre-wrap">{{ summary_org|tojson(indent=2) }}</pre>
+  </div>
+  {% endif %}
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
     <div class="panel panel-section">
@@ -69,10 +80,23 @@
   </div>
 
   {% if bundle.report_html %}
-  <div class="panel overflow-hidden">
+  <div id="run-report" class="panel overflow-hidden">
     <h3 class="panel-section text-sm font-semibold border-b border-[var(--color-border)]">report.md</h3>
-    <div class="panel-section prose-run max-w-none text-sm">{{ bundle.report_html|safe }}</div>
+    <div class="panel-section prose-run max-w-none text-sm max-h-96 overflow-y-auto">{{ bundle.report_html|safe }}</div>
+    <div class="panel-section border-t border-[var(--color-border)]">
+      <a href="/runs/{{ bundle.url_path }}?view=summary&channel={{ bundle.primary_channel|urlencode }}#run-report" class="btn btn-ghost text-xs">Open full report in summary view</a>
+    </div>
   </div>
+  {% else %}
+  <form
+    class="panel panel-section flex items-center justify-between gap-3"
+    hx-post="/runs/{{ bundle.url_path }}/generate_report"
+    hx-target="#center-stage"
+    hx-swap="innerHTML"
+  >
+    <div class="text-xs text-[var(--color-text-muted)]">No report generated for this run yet.</div>
+    <button type="submit" class="btn btn-primary text-xs">Generate report</button>
+  </form>
   {% endif %}
   {% if bundle.comparison_html %}
   <div class="panel overflow-hidden">

@@ -1,12 +1,12 @@
 # Web UI conventions
 
-Read-only **mission control** and **experiments** UI for finished runs. Stack: **FastAPI**, **Jinja2**, **HTMX**, **Alpine.js** (CDN), **Tailwind CSS** (standalone CLI build).
+Mission-control, scenario-editor, and experiments UI. Stack: **FastAPI**, **Jinja2**, **HTMX**, **Alpine.js** (CDN), **Tailwind CSS** (standalone CLI build), and vendored **EasyMDE** for markdown editing.
 
 Everything here is the source of truth for `harness/web/` templates, static assets, and JS.
 
 ## Layout and files
 
-```
+```text
 harness/web/
   app.py              # FastAPI create_app
   run_reader.py       # load runs/batches from disk → Pydantic models
@@ -58,6 +58,20 @@ Follow the same patterns as a small-Alpine + server-rendered app:
 ## a11y
 
 Focus states on interactive controls (`focus-visible:ring` or component equivalents). Channels/Vitals labels must be readable in the right rail.
+
+## Scenario editor conventions
+
+- Route surface:
+  - `/scenarios/{slug}/edit` is the single editor shell.
+  - `/partials/scenario/{slug}/section/{section}` serves center-stage section swaps.
+  - Object edits are `POST /scenarios/{slug}/edit/*` and return the updated partial HTML.
+- Markdown fields (`setting.md`, character backstory) use EasyMDE on `<textarea data-easymde="markdown">`.
+- YAML fields (`process.yaml`, `best_practices.yaml`) stay plain textareas. On parse errors, return HTTP 422 and render a line-marked preview with `.yaml-error-line`.
+- Mid-run lock model:
+  - Locked: initial conditions (work-item seed), starting vitals, character core profile fields, backstory.
+  - Editable: process/goals/parameters/channels/teams/model/sprite fields.
+  - Editable changes during a live run append `coach_edit` timeline rows with `effective_turn = world.turn + 1`.
+- User-facing copy uses **Make a copy**; `/scenarios/{slug}/fork` remains a compatibility alias that redirects to `/copy`.
 
 ## Build CSS
 

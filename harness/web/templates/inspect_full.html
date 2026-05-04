@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Inspect {{ inspect_title }} — agile-sim{% endblock %}
+{% block body %}
+<div class="flex flex-col min-h-screen">
+  <header class="topbar topbar--runner shrink-0">
+    <div class="runner-topbar-inner">
+      <a href="/runs/{{ bundle.url_path }}?view=channels&channel={{ bundle.primary_channel|urlencode }}" class="topbar-back-link text-sm">← Runner</a>
+      <a href="/runs" class="nav-link text-sm">Runs</a>
+      <a href="/scenarios" class="nav-link text-sm">Scenarios</a>
+      <a href="/experiments" class="nav-link text-sm">Experiments</a>
+      <h1 class="text-base font-bold">{{ inspect_title }}</h1>
+      <span class="topbar-chip text-xs">Turn {{ effective_turn }}</span>
+    </div>
+  </header>
+  <main class="flex-1 min-w-0 overflow-y-auto bg-[var(--color-bg-app)] p-4">
+    <div class="panel panel-section max-w-4xl">
+      {% include inspect_partial %}
+    </div>
+  </main>
+</div>
+{% endblock %}

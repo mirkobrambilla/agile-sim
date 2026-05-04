@@ -1,9 +1,14 @@
 <div class="inspector-sheet flex flex-col gap-3 text-sm">
   <div class="flex justify-between items-start gap-2">
     <h3 class="text-base font-bold">Channel</h3>
+    {% if full_page %}
+    <a href="/runs/{{ bundle.url_path }}?view=channels&channel={{ inspect_channel|urlencode }}" class="text-xs text-[var(--color-text-muted)] hover:underline">← Back to runner</a>
+    {% else %}
     <button type="button" class="text-xs text-[var(--color-text-muted)] hover:underline" @click="inspectorOpen = false">Close</button>
+    {% endif %}
   </div>
   <p class="font-mono text-xs">{{ inspect_channel or '—' }}</p>
+  <a href="/runs/{{ bundle.url_path }}/inspect/channel/{{ inspect_channel|urlencode }}?turn={{ effective_turn }}" class="text-xs text-[var(--color-accent)] hover:underline">Open full page</a>
   {% if channel_inspector_meta %}
   <ul class="list-none p-0 m-0 text-xs text-[var(--color-text-muted)] flex flex-col gap-1">
     <li>Messages: {{ channel_inspector_meta.message_count }}</li>

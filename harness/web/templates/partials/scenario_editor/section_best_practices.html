@@ -1,0 +1,23 @@
+<div class="panel panel-section max-w-5xl">
+  <div class="flex items-center justify-between gap-2 mb-2">
+    <h2 class="text-base font-semibold">Best Practices YAML</h2>
+    {% if message %}<span class="chip text-xs">{{ message }}</span>{% endif %}
+  </div>
+  {% if error %}
+  <p class="text-xs text-[var(--color-fail)] mb-2">{{ error }}</p>
+  {% if error_line %}<p class="text-xs text-[var(--color-text-muted)] mb-2">Line {{ error_line }}</p>{% endif %}
+  {% endif %}
+  <form class="flex flex-col gap-2"
+        hx-post="/scenarios/{{ slug|urlencode }}/edit/best_practices"
+        hx-target="#scenario-center-stage"
+        hx-swap="innerHTML">
+    <textarea name="content" rows="16" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)] font-mono">{{ best_practices_raw }}</textarea>
+    <button type="submit" class="btn btn-primary text-sm self-start">Save best-practices YAML</button>
+  </form>
+  {% if best_practices_rows %}
+  <div class="panel panel-section mt-3">
+    <div class="text-xs text-[var(--color-text-muted)] mb-2">YAML with line markers</div>
+    <pre class="text-xs font-mono overflow-auto max-h-64">{% for row in best_practices_rows %}<div class="{% if row.error %}yaml-error-line{% endif %}">{{ "%03d"|format(row.no) }}: {{ row.text }}</div>{% endfor %}</pre>
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,44 @@
+<div class="panel panel-section max-w-4xl flex flex-col gap-3">
+  <div class="flex items-center justify-between gap-2">
+    <h2 class="text-base font-semibold">Setting</h2>
+    {% if saved %}
+    <span class="chip text-xs">Saved</span>
+    {% endif %}
+  </div>
+  <p class="text-xs text-[var(--color-text-muted)]">
+    Markdown scenario context used for agent prompts. Use Preview to verify formatting.
+  </p>
+  <form
+    class="flex flex-col gap-3"
+    hx-post="/scenarios/{{ slug|urlencode }}/edit/setting"
+    hx-target="#scenario-center-stage"
+    hx-swap="innerHTML"
+  >
+    <div x-data="{ preview: {{ 'true' if preview else 'false' }} }" class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <button type="button" class="btn btn-ghost text-xs" @click="preview = !preview" x-text="preview ? 'Hide preview' : 'Preview'"></button>
+        <span class="text-xs text-[var(--color-text-muted)]">Ctrl/Cmd+Enter to save</span>
+      </div>
+      <input type="hidden" name="preview" :value="preview ? '1' : '0'" />
+      <div x-show="!preview" x-cloak>
+        <textarea
+          name="content"
+          rows="18"
+          data-easymde="markdown"
+          class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]"
+        >{{ setting_raw }}</textarea>
+      </div>
+      <div x-show="preview" x-cloak class="panel panel-section prose-run text-sm">
+        {% if setting_html %}
+        {{ setting_html|safe }}
+        {% else %}
+        <p class="text-[var(--color-text-muted)]">Nothing to preview yet.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="submit" class="btn btn-primary text-sm">Save</button>
+      <a href="/scenarios/{{ slug|urlencode }}/edit?section=setting" class="btn btn-ghost text-sm">Discard</a>
+    </div>
+  </form>
+</div>

@@ -19,11 +19,11 @@
           {% if sv %}
           <button type="button" class="sprite sprite--from-asset w-8 h-8 border-0 cursor-pointer p-0 shrink-0" style="background-image: url('{{ sv }}')"
             hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ mid)|urlencode }}&turn={{ effective_turn }}"
-            hx-target="#center-stage" hx-swap="innerHTML"></button>
+            hx-target="#center-stage" hx-swap="innerHTML" hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ mid)|urlencode }}"></button>
           {% else %}
           <button type="button" class="sprite sprite--idle w-8 h-8 text-[0.45rem] cursor-pointer shrink-0"
             hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ mid)|urlencode }}&turn={{ effective_turn }}"
-            hx-target="#center-stage" hx-swap="innerHTML">{{ (mid[:2])|upper }}</button>
+            hx-target="#center-stage" hx-swap="innerHTML" hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ mid)|urlencode }}">{{ (mid[:2])|upper }}</button>
           {% endif %}
           <div class="min-w-0 flex-1">
             <div class="text-xs font-semibold truncate">{{ mx.get('name', mid) }}</div>
@@ -62,6 +62,7 @@
               hx-swap="innerHTML"
               @click="inspectorOpen = true"
             >i</button>
+            <a href="/runs/{{ bundle.url_path }}/inspect/work_item/{{ wi.id|urlencode }}?turn={{ effective_turn }}" class="text-xs text-[var(--color-accent)] hover:underline shrink-0">full</a>
           </div>
           <div class="mt-1">
             <span class="kanban-state-pill kanban-state-pill--{{ col_name }}">{{ col_name }}</span>
@@ -70,11 +71,11 @@
             {% if sv %}
             <button type="button" class="sprite sprite--from-asset w-6 h-6 shrink-0 border-0 cursor-pointer p-0" style="background-image: url('{{ sv }}')" title="{{ oid }}"
               hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ oid)|urlencode }}&turn={{ effective_turn }}"
-              hx-target="#center-stage" hx-swap="innerHTML"></button>
+              hx-target="#center-stage" hx-swap="innerHTML" hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ oid)|urlencode }}"></button>
             {% else %}
             <button type="button" class="sprite sprite--idle w-6 h-6 text-[0.35rem] shrink-0 cursor-pointer" title="{{ oid }}"
               hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ oid)|urlencode }}&turn={{ effective_turn }}"
-              hx-target="#center-stage" hx-swap="innerHTML">{{ (oid[:2] or '?')|upper }}</button>
+              hx-target="#center-stage" hx-swap="innerHTML" hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ oid)|urlencode }}">{{ (oid[:2] or '?')|upper }}</button>
             {% endif %}
             <span>{{ om.get('name', oid) }}</span>
           </div>

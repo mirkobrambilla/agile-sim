@@ -1,33 +1,49 @@
 {% extends "base.html" %}
 {% block title %}Runs — agile-sim{% endblock %}
 {% block body %}
-<header class="topbar sticky top-0 z-10">
-  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-4xl mx-auto">
-    <div>
-      <h1 class="text-lg font-bold">Runs</h1>
-      <p class="text-xs text-[var(--color-text-muted)] mt-1">Open a finished batch or single run. Newest first.</p>
-    </div>
-    <div class="flex flex-wrap items-center gap-2">
-      <a href="/experiments" class="btn btn-ghost text-sm">Experiments table</a>
-      <a href="/scenarios" class="btn btn-ghost text-sm">Scenarios</a>
-      <p class="text-xs text-[var(--color-text-muted)]"><code class="font-[family-name:var(--font-mono)]">{{ runs_dir }}</code></p>
-    </div>
-  </div>
-</header>
+{% set header_title = "Runs" %}
+{% set header_subtitle = "Open a finished batch or single run. Newest first." %}
+{% set header_max_width = "max-w-4xl" %}
+{% set header_show_runs_dir = true %}
+{% include "partials/site_header.html" %}
 
 <main class="max-w-4xl mx-auto px-4 py-6">
+  <section class="panel panel-section mb-4">
+    <h2 class="text-sm font-semibold mb-3">Quick actions</h2>
+    <div class="home-quick-actions">
+      <a href="/new" class="home-action-card">
+        <div class="home-action-card__title">New run</div>
+        <div class="home-action-card__desc">Start a live simulation from an existing scenario.</div>
+      </a>
+      <a href="/scenarios/new" class="home-action-card">
+        <div class="home-action-card__title">New scenario</div>
+        <div class="home-action-card__desc">Create a fresh scenario with starter files.</div>
+      </a>
+      <a href="/scenarios" class="home-action-card">
+        <div class="home-action-card__title">Scenario library</div>
+        <div class="home-action-card__desc">Inspect, copy, and edit existing scenarios.</div>
+      </a>
+      <a href="/experiments" class="home-action-card">
+        <div class="home-action-card__title">Experiments</div>
+        <div class="home-action-card__desc">Review batch results and comparison reports.</div>
+      </a>
+    </div>
+  </section>
+
   {% if picker_items %}
   <ul class="flex flex-col gap-3 list-none p-0 m-0">
     {% for it in picker_items %}
     <li>
+      {% set is_goal_true = 'goal_met=True' in (it.sub or '') %}
+      {% set is_goal_false = 'goal_met=False' in (it.sub or '') %}
       <a
         href="{{ it.href }}"
-        class="picker-card panel block overflow-hidden no-underline text-[var(--color-text)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        class="picker-card panel block overflow-hidden no-underline text-[var(--color-text)] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)] {% if is_goal_true %}border-l-4 border-l-[var(--color-ok)]{% elif is_goal_false %}border-l-4 border-l-[var(--color-fail)]{% endif %}"
       >
         <div class="panel-section flex flex-wrap items-start justify-between gap-3">
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2 mb-1">
-              <span class="font-semibold font-[family-name:var(--font-mono)] text-sm break-all">{{ it.title }}</span>
+              <span class="font-semibold font-[family-name:var(--font-mono)] text-base break-all">{{ it.title }}</span>
               <span class="chip shrink-0">{{ it.kind_label }}</span>
             </div>
             <p class="text-sm text-[var(--color-text)] mb-1">{{ it.scenario }}</p>

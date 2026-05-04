@@ -1,0 +1,82 @@
+<div class="flex flex-col gap-3">
+  <div class="flex items-center justify-between gap-2">
+    <h3 class="text-sm font-semibold">Edit {{ inspect_character.get('name', inspect_cid) }}</h3>
+    <form
+      hx-post="/scenarios/{{ slug|urlencode }}/character/{{ inspect_cid|urlencode }}/delete"
+      hx-target="#scenario-center-stage"
+      hx-swap="innerHTML"
+      onsubmit="return confirm('Delete character {{ inspect_cid }}?');"
+    >
+      <button type="submit" class="btn btn-ghost text-xs">Delete</button>
+    </form>
+  </div>
+  {% if error %}
+  <div class="text-xs text-[var(--color-fail)]">{{ error }}</div>
+  {% elif message %}
+  <div class="chip text-xs">{{ message }}</div>
+  {% endif %}
+  <form
+    class="flex flex-col gap-2"
+    hx-post="/scenarios/{{ slug|urlencode }}/edit/character/{{ inspect_cid|urlencode }}"
+    hx-target="#scenario-character-inspector"
+    hx-swap="innerHTML"
+  >
+    <label class="text-xs text-[var(--color-text-muted)]">ID</label>
+    <input value="{{ inspect_cid }}" disabled class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-app)] text-[var(--color-text-muted)] font-mono" />
+
+    <label class="text-xs text-[var(--color-text-muted)]">Name</label>
+    <input name="name" value="{{ inspect_character.get('name','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+
+    <label class="text-xs text-[var(--color-text-muted)]">Role</label>
+    <input name="role" value="{{ inspect_character.get('role','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+
+    <label class="text-xs text-[var(--color-text-muted)]">Sprite set</label>
+    <input name="sprite_set" value="{{ inspect_character.get('sprite_set','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)] font-mono" />
+
+    <label class="text-xs text-[var(--color-text-muted)]">Model</label>
+    <input name="model" value="{{ inspect_character.get('model','') }}" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)] font-mono" />
+
+    {% set iv = inspect_character.get('initial_vitals') or {} %}
+    <div class="grid grid-cols-3 gap-2">
+      <div>
+        <label class="text-xs text-[var(--color-text-muted)]">Energy</label>
+        <input name="energy" value="{{ iv.get('energy',50) }}" type="number" min="0" max="100" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-text-muted)]">Motivation</label>
+        <input name="motivation" value="{{ iv.get('motivation',50) }}" type="number" min="0" max="100" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-text-muted)]">Stress</label>
+        <input name="stress" value="{{ iv.get('stress',50) }}" type="number" min="0" max="100" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="submit" class="btn btn-primary text-xs">Save fields</button>
+    </div>
+  </form>
+
+  <form
+    class="flex flex-col gap-2"
+    hx-post="/scenarios/{{ slug|urlencode }}/edit/character/{{ inspect_cid|urlencode }}/backstory"
+    hx-target="#scenario-character-inspector"
+    hx-swap="innerHTML"
+  >
+    <div x-data="{ preview: {{ 'true' if preview else 'false' }} }" class="flex flex-col gap-2">
+      <div class="flex items-center justify-between gap-2">
+        <label class="text-xs text-[var(--color-text-muted)] font-semibold">Backstory markdown</label>
+        <button type="button" class="btn btn-ghost text-xs" @click="preview = !preview" x-text="preview ? 'Hide preview' : 'Preview'"></button>
+      </div>
+      <input type="hidden" name="preview" :value="preview ? '1' : '0'" />
+      <div x-show="!preview" x-cloak>
+        <textarea name="content" rows="10" data-easymde="markdown" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]">{{ backstory_raw }}</textarea>
+      </div>
+      <div x-show="preview" x-cloak class="panel panel-section prose-run text-sm">
+        {% if backstory_html %}{{ backstory_html|safe }}{% else %}
+        <p class="text-[var(--color-text-muted)]">Nothing to preview yet.</p>
+        {% endif %}
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary text-xs self-start">Save backstory</button>
+  </form>
+</div>

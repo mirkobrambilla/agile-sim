@@ -1,18 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Scenario {{ slug }} — agile-sim{% endblock %}
 {% block body %}
-<header class="topbar sticky top-0 z-10">
-  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-5xl mx-auto">
-    <div>
-      <h1 class="text-lg font-bold">{{ scenario.get('name', slug) }}</h1>
-      <p class="text-xs text-[var(--color-text-muted)] mt-1 font-mono">{{ scenario.get('id', slug) }}</p>
-    </div>
-    <div class="flex gap-2">
-      <a href="/scenarios" class="btn btn-ghost text-sm">Back to scenarios</a>
-      <a href="/new?scenario={{ slug|urlencode }}" class="btn btn-primary text-sm">New live run</a>
-    </div>
-  </div>
-</header>
+{% set header_title = scenario.get('name', slug) %}
+{% set header_subtitle = scenario.get('id', slug) %}
+{% set header_max_width = "max-w-5xl" %}
+{% include "partials/site_header.html" %}
 
 <main class="max-w-5xl mx-auto px-4 py-6 flex flex-col gap-4">
   <div class="panel panel-section">
@@ -28,7 +20,7 @@
         <li class="border-b border-[var(--color-border)] pb-2">
           <div class="font-semibold">{{ c.get('name', c.get('id')) }}</div>
           <div class="text-[var(--color-text-muted)] font-mono">{{ c.get('id') }} · {{ c.get('role','') }}</div>
-          <div class="text-[var(--color-text-muted)]">🔒 fork to edit</div>
+          <div class="text-[var(--color-text-muted)]">Make a copy to edit</div>
         </li>
         {% endfor %}
       </ul>
@@ -40,7 +32,7 @@
         <li class="border-b border-[var(--color-border)] pb-2">
           <div class="font-mono">{{ ch.get('name') }}</div>
           <div class="text-[var(--color-text-muted)]">coach: {{ ch.get('coach_engagement', 'post') }}</div>
-          <div class="text-[var(--color-text-muted)]">🔒 fork to edit</div>
+          <div class="text-[var(--color-text-muted)]">Make a copy to edit</div>
         </li>
         {% endfor %}
       </ul>
@@ -50,15 +42,15 @@
   <div class="panel panel-section">
     <h2 class="text-sm font-semibold mb-2">Goals and parameters</h2>
     <pre class="text-xs bg-[var(--color-bg-app)] border border-[var(--color-border)] rounded-[var(--radius-sm)] p-3 overflow-x-auto">{{ {'goals': scenario.get('goals'), 'parameters': scenario.get('parameters')}|tojson }}</pre>
-    <div class="text-[var(--color-text-muted)] text-xs mt-2">🔒 fork to edit</div>
+    <div class="text-[var(--color-text-muted)] text-xs mt-2">Make a copy to edit</div>
   </div>
 
-  <form method="post" action="/scenarios/{{ slug|urlencode }}/fork" class="panel panel-section flex items-center justify-between gap-3">
+  <form method="post" action="/scenarios/{{ slug|urlencode }}/copy_and_edit" class="panel panel-section flex items-center justify-between gap-3">
     <div>
-      <div class="font-semibold text-sm">Fork scenario</div>
-      <div class="text-xs text-[var(--color-text-muted)]">Creates <code>{{ slug }}__fork-&lt;timestamp&gt;</code> in <code>scenarios/</code>.</div>
+      <div class="font-semibold text-sm">Make a copy</div>
+      <div class="text-xs text-[var(--color-text-muted)]">Creates <code>{{ slug }}__copy-&lt;timestamp&gt;</code> in <code>scenarios/</code> and opens the editor.</div>
     </div>
-    <button type="submit" class="btn btn-primary text-sm">Fork</button>
+    <button type="submit" class="btn btn-primary text-sm">Make a copy & edit</button>
   </form>
 </main>
 {% endblock %}

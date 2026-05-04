@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4 max-w-4xl">
   <h2 class="text-lg font-semibold">Timeline</h2>
-  <p class="text-xs text-[var(--color-text-muted)]">Turn scrub (jump to replay). Viewing: T{{ effective_turn }}</p>
+  <p class="text-xs text-[var(--color-text-muted)]">Vertical event log. Viewing: T{{ effective_turn }}</p>
   {% if turn_ticks %}
   <div class="flex flex-wrap gap-2 items-center">
     {% for t in turn_ticks %}
@@ -11,11 +11,39 @@
     {% endfor %}
   </div>
   {% endif %}
-  <ul class="flex flex-col gap-2 list-none p-0 m-0 text-sm">
-    {% for row in bundle.timeline %}
-    <li class="panel panel-section py-2">
-      <span class="font-mono text-xs text-[var(--color-text-muted)]">{{ row.kind }}</span>
-      <pre class="mt-1 text-xs overflow-x-auto font-[family-name:var(--font-mono)] whitespace-pre-wrap">{{ row.raw|tojson(indent=2) }}</pre>
+  <ul class="timeline-log flex flex-col gap-4 list-none p-0 m-0 text-sm">
+    {% for group in grouped_timeline or [] %}
+    <li class="timeline-turn-group">
+      <div class="timeline-turn-head">Turn {{ group.turn }}</div>
+      <ul class="list-none p-0 m-0 flex flex-col gap-2">
+        {% for ev in group.events %}
+        {% set kind = ev.kind %}
+        {% set tone = 'system' %}
+        {% if kind in ['coach_human_post', 'coach_edit', 'coach_reflection'] %}
+          {% set tone = 'coach' %}
+        {% elif kind in ['agent_turn', 'turn_start'] %}
+          {% set tone = 'agent' %}
+        {% elif kind in ['vital_self_report', 'goal_eval', 'run_end'] %}
+          {% set tone = 'metric' %}
+        {% endif %}
+        <li class="panel panel-section timeline-event timeline-event--{{ tone }}">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-mono text-xs text-[var(--color-text-muted)]">{{ kind }}</span>
+            <details>
+              <summary class="text-xs text-[var(--color-accent)] cursor-pointer">Show raw</summary>
+              <pre class="mt-1 text-xs overflow-x-auto font-[family-name:var(--font-mono)] whitespace-pre-wrap">{{ ev.raw|tojson(indent=2) }}</pre>
+            </details>
+          </div>
+          {% if kind == 'coach_human_post' %}
+          <p class="text-xs mt-1">Coach posted in <code>{{ ev.raw.get('channel', '—') }}</code>.</p>
+          {% elif kind == 'coach_edit' %}
+          <p class="text-xs mt-1">Coach edit target: <code>{{ ev.raw.get('target', '—') }}</code>.</p>
+          {% elif kind == 'agent_turn' %}
+          <p class="text-xs mt-1">Agent: <code>{{ ev.raw.get('character', '—') }}</code>.</p>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
     </li>
     {% else %}
     <li class="text-[var(--color-text-muted)]">No timeline events.</li>

@@ -1,0 +1,66 @@
+<div class="panel panel-section max-w-5xl">
+  <div class="flex items-center justify-between gap-2 mb-2">
+    <h2 class="text-base font-semibold">Work Items</h2>
+    {% if message %}<span class="chip text-xs">{{ message }}</span>{% endif %}
+  </div>
+  {% if error %}<p class="text-xs text-[var(--color-fail)] mb-2">{{ error }}</p>{% endif %}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-xs text-[var(--color-text-muted)]">
+          <th class="py-1">ID</th><th>Title</th><th>State</th><th>Owner</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for wi in scenario.get('work_items') or [] %}
+        <tr class="border-t border-[var(--color-border)]">
+          <td class="py-2 font-mono">{{ wi.get('id') }}</td>
+          <td>{{ wi.get('title','') }}</td>
+          <td>{{ wi.get('state','backlog') }}</td>
+          <td>{{ wi.get('owner_id','') }}</td>
+          <td class="text-right">
+            <form hx-post="/scenarios/{{ slug|urlencode }}/work_item/delete" hx-target="#scenario-center-stage" hx-swap="innerHTML">
+              <input type="hidden" name="id" value="{{ wi.get('id') }}" />
+              <button type="submit" class="btn btn-ghost text-xs">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form class="panel panel-section mt-4 grid grid-cols-1 md:grid-cols-4 gap-2 items-end"
+        hx-post="/scenarios/{{ slug|urlencode }}/edit/work_item"
+        hx-target="#scenario-center-stage"
+        hx-swap="innerHTML">
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">ID</label>
+      <input name="id" placeholder="W1" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">Title</label>
+      <input name="title" placeholder="Describe work item" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]" />
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">State</label>
+      <select name="state" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]">
+        <option value="backlog">backlog</option>
+        <option value="doing">doing</option>
+        <option value="done">done</option>
+        <option value="parked">parked</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-[var(--color-text-muted)]">Owner</label>
+      <select name="owner_id" class="w-full text-sm border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2 bg-[var(--color-bg-panel)]">
+        <option value="">(none)</option>
+        {% for c in scenario.get('characters') or [] %}
+        <option value="{{ c.get('id') }}">{{ c.get('id') }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="md:col-span-4">
+      <button type="submit" class="btn btn-primary text-sm">Save work item</button>
+    </div>
+  </form>
+</div>

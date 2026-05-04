@@ -33,5 +33,7 @@
   <p class="topbar-chip w-fit text-[var(--color-text)]">
     Work done: {{ work_done_count }} / {{ work_total }}
   </p>
+  {% if not live_session %}
   <p class="text-xs text-[var(--color-text-muted)]">Read-only replay; open runs from home or picker.</p>
+  {% endif %}
 </div>

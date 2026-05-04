@@ -1,8 +1,13 @@
 <div class="inspector-sheet flex flex-col gap-3 text-sm">
   <div class="flex justify-between items-start gap-2">
     <h3 class="text-base font-bold">Character · {{ inspect_cid }}</h3>
+    {% if full_page %}
+    <a href="/runs/{{ bundle.url_path }}?view=roster&channel={{ bundle.primary_channel|urlencode }}" class="text-xs text-[var(--color-text-muted)] hover:underline">← Back to runner</a>
+    {% else %}
     <button type="button" class="text-xs text-[var(--color-text-muted)] hover:underline" @click="inspectorOpen = false">Close</button>
+    {% endif %}
   </div>
+  <a href="/runs/{{ bundle.url_path }}/inspect/character/{{ inspect_cid|urlencode }}?turn={{ effective_turn }}" class="text-xs text-[var(--color-accent)] hover:underline">Open full page</a>
   {% set v = (inspect_character.get('vitals') or {}) %}
   <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn }} · E {{ v.get('energy','?') }} · M {{ v.get('motivation','?') }} · S {{ v.get('stress','?') }}</p>
   {% if inspect_narratives %}

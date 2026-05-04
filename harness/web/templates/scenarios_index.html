@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Scenarios — agile-sim{% endblock %}
 {% block body %}
-<header class="topbar sticky top-0 z-10">
-  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-5xl mx-auto">
-    <div>
-      <h1 class="text-lg font-bold">Scenarios</h1>
-      <p class="text-xs text-[var(--color-text-muted)] mt-1">Browse scenario cards, inspect details, and fork before editing.</p>
-    </div>
-    <a href="/" class="btn btn-ghost text-sm">Runs</a>
-  </div>
-</header>
+{% set header_title = "Scenarios" %}
+{% set header_subtitle = "Browse scenario cards, inspect details, and fork before editing." %}
+{% set header_max_width = "max-w-5xl" %}
+{% include "partials/site_header.html" %}
 
 <main class="max-w-5xl mx-auto px-4 py-6">
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

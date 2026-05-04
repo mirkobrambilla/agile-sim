@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Experiments — agile-sim{% endblock %}
 {% block body %}
-<header class="topbar sticky top-0 z-10">
-  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-6xl mx-auto">
-    <h1 class="text-lg font-bold">Experiments</h1>
-    <a href="/" class="btn btn-ghost text-sm">← Run list</a>
-  </div>
-</header>
+{% set header_title = "Experiments" %}
+{% set header_subtitle = "Batch-level comparisons and reports." %}
+{% include "partials/site_header.html" %}
 <main class="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4">
   {% if not batches %}
   <p class="text-[var(--color-text-muted)]">No batch directories with <code>manifest.json</code>.</p>

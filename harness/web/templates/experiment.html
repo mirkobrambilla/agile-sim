@@ -1,15 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ batch_id }} — experiment{% endblock %}
 {% block body %}
-<header class="topbar sticky top-0 z-10">
-  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-3 max-w-6xl mx-auto">
-    <div class="flex flex-col gap-1">
-      <a href="/experiments" class="text-xs text-[var(--color-text-muted)] hover:underline">← Experiments</a>
-      <h1 class="text-lg font-bold">{{ batch_id }}</h1>
-    </div>
-    <a href="/" class="btn btn-ghost text-sm">← Run list</a>
-  </div>
-</header>
+{% set header_title = batch_id %}
+{% set header_back_href = "/experiments" %}
+{% set header_back_label = "← Experiments" %}
+{% include "partials/site_header.html" %}
 <main class="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-6">
   {% if metrics and metrics.variants %}
   <section class="panel overflow-hidden">

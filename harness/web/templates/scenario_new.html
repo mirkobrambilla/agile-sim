@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}New scenario — agile-sim{% endblock %}
+{% block body %}
+{% set header_title = "Create a scenario" %}
+{% set header_subtitle = "Create a scenario folder under scenarios/ with starter files." %}
+{% set header_max_width = "max-w-4xl" %}
+{% set header_show_new_scenario = false %}
+{% include "partials/site_header.html" %}
+<div class="max-w-4xl mx-auto p-6 flex flex-col gap-4">
+  <p class="text-sm text-[var(--color-text-muted)]">Creates a new scenario folder under <code>scenarios/</code> with starter files, then opens the scenario editor.</p>
+
+  {% if error %}
+  <div class="panel panel-section text-sm border-l-4 border-l-[var(--color-fail)]">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/scenarios/new" class="panel panel-section flex flex-col gap-3">
+    <label class="flex flex-col gap-1 text-sm">
+      <span class="font-semibold">Scenario id</span>
+      <input name="scenario_id" placeholder="incident-response-lab" class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2 font-mono" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      <span class="font-semibold">Scenario name</span>
+      <input name="name" placeholder="Incident Response Lab" class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      <span class="font-semibold">Description (optional)</span>
+      <textarea name="description" rows="3" class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2"></textarea>
+    </label>
+    <div class="flex gap-2">
+      <button type="submit" class="btn btn-primary">Create scenario</button>
+      <a href="/scenarios" class="btn btn-ghost">Back to scenarios</a>
+    </div>
+  </form>
+
+  {% if scenarios %}
+  <div class="panel panel-section">
+    <h2 class="text-sm font-semibold mb-2">Or copy an existing scenario</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      {% for s in scenarios %}
+      <form method="post" action="/scenarios/{{ s.slug|urlencode }}/copy_and_edit" class="flex items-center justify-between gap-2 border border-[var(--color-border)] rounded-[var(--radius-sm)] p-2">
+        <div class="min-w-0">
+          <div class="text-sm font-semibold truncate">{{ s.name }}</div>
+          <div class="text-xs text-[var(--color-text-muted)] font-mono truncate">{{ s.id }}</div>
+        </div>
+        <button type="submit" class="btn btn-ghost text-xs shrink-0">Copy & edit</button>
+      </form>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

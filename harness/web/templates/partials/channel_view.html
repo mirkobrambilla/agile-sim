@@ -1,5 +1,5 @@
 <div class="channel-shell flex flex-col gap-3 max-w-3xl h-full min-h-0">
-  <div class="channel-header flex items-center justify-between gap-2">
+  <div class="channel-header channel-header--sticky flex items-center justify-between gap-2">
     <h2 class="text-lg font-semibold font-[family-name:var(--font-mono)]">{{ channel }}</h2>
     <div class="flex items-center gap-2">
       <button
@@ -10,6 +10,10 @@
         hx-swap="innerHTML"
         @click="inspectorOpen = true"
       >Inspect channel</button>
+      <a
+        href="/runs/{{ bundle.url_path }}/inspect/channel/{{ channel|urlencode }}?turn={{ effective_turn }}"
+        class="text-xs text-[var(--color-accent)] hover:underline"
+      >Open full page</a>
       {% if live_session %}
       <span class="chip">live</span>
       {% else %}
@@ -43,6 +47,7 @@
             hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ m.author)|urlencode }}&turn={{ effective_turn }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ m.author)|urlencode }}"
             aria-label="Open DM with {{ m.author }}"
           ></button>
           {% else %}
@@ -53,6 +58,7 @@
             hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ m.author)|urlencode }}&turn={{ effective_turn }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ m.author)|urlencode }}"
           >{{ (m.author[:2] or '?')|upper }}</button>
           {% endif %}
         {% else %}
@@ -79,7 +85,7 @@
   </div>
   {% if live_session %}
   <form
-    class="channel-composer sticky bottom-0 flex flex-col gap-2 border-t border-[var(--color-border)] pt-3 mt-2"
+    class="channel-composer channel-composer--sticky flex flex-col gap-2 border-t border-[var(--color-border)] pt-3 mt-2"
     hx-post="/runs/{{ bundle.url_path }}/coach/post"
     hx-target="#center-stage"
     hx-swap="innerHTML"

@@ -9,7 +9,7 @@ Update this file when items move (status changes, decisions taken, new evidence)
 
 ## Status today
 
-Headless harness plus a **web UI with both read-only replay and live, human-in-the-loop runs** (`harness/web`, `agile-harness serve`). The home page is a **run list** (picker): batches and standalone runs, newest first, with scenario label and UTC mtime; links open the experiment page or mission control. The experiments table remains at `/experiments`. Scenarios are browsable at `/scenarios` and `/scenarios/{slug}` with a fork action; live runs start from `/new`. CLI `agile-harness view` and runner URLs resolve batch/run slugs by exact name, unique prefix, or return an error that lists ambiguous matches (`harness/web/resolve.py`).
+Headless harness plus a **web UI with both read-only replay and live, human-in-the-loop runs** (`harness/web`, `agile-harness serve`). The home page is a **run list** (picker): batches and standalone runs, newest first, with scenario label and UTC mtime; links open the experiment page or mission control. The experiments table remains at `/experiments`. Scenarios are browsable at `/scenarios` and `/scenarios/{slug}` with a **Make a copy** action and an in-app editor at `/scenarios/{slug}/edit`; live runs start from `/new`. CLI `agile-harness view` and runner URLs resolve batch/run slugs by exact name, unique prefix, or return an error that lists ambiguous matches (`harness/web/resolve.py`).
 
 Live mode (`harness/web/run_session.py`) keeps a `RunSession` per active run: advance one turn at a time (`/runs/{id}/advance`), stream progress over SSE (`/events`), cancel mid-turn, post into channels as the coach, nudge a vital or scenario parameter (effective N+1), and write a coach reflection. Sessions persist to disk and rebuild from `meta.yaml` + last snapshot on app restart.
 
@@ -18,8 +18,8 @@ Live mode (`harness/web/run_session.py`) keeps a `RunSession` per active run: ad
 | Plan area | Status | Notes |
 |---|---|---|
 | Scenario folder format (YAML + markdown) | done | `harness/scenario.py`, three scenarios in `scenarios/` |
-| Scenario browse / view / fork (web) | done | `/scenarios`, `/scenarios/{slug}`, `POST /scenarios/{slug}/fork` |
-| Scenario edit (web) | not built | Edit happens by hand in the YAML/markdown files for now |
+| Scenario browse / view / copy (web) | done | `/scenarios`, `/scenarios/{slug}`, `POST /scenarios/{slug}/copy`, `POST /scenarios/{slug}/copy_and_edit` (`/fork` alias retained) |
+| Scenario edit (web) | done | `/scenarios/{slug}/edit` with section navigation, setting markdown editor, character inspector, channel/team/work-item forms, goals + parameters editors, and YAML editors for process + best-practices |
 | World ledger (work, vitals, msgs, teams) | partial | `harness/world.py`; no `PersonTurnRecord`, no relationships |
 | Process engine (`consult` / `invoke` / `tick` / …) | partial | `harness/engine.py` logs allowlisted `process_invocations` to timeline; vocabulary documented in `architecture.md` / `requirements.md` F-PE2; ledger mutation still shallow; no validation, queueing, scheduler, or `edit` |
 | Per-turn agent loop (single structured call) | done | `harness/agent.py` + Pydantic schemas |
@@ -38,7 +38,7 @@ Live mode (`harness/web/run_session.py`) keeps a `RunSession` per active run: ad
 | End-of-sim summary view (F26) | partial | Outcome stoplight, character-arc cards, metric sparklines, reflection text are in the summary partial; **missing**: coaching-moment cards with helpful/mixed/harmful/neutral impact tags + best-practice-keyed alternatives, in-app full-screen Final Report with `.md` download |
 | Web UI mission control (read mode) | done | FastAPI + Jinja + HTMX + Alpine; topbar, channels rail, kanban, roster, timeline, summary, vitals rail, inspector drawer; see `docs/web-conventions.md` |
 | Live runs from the UI (start, advance, SSE, restore) | done | `/new`, `POST /runs`, `/runs/{id}/advance`, `/events`, `/cancel`; resumes after app restart via `RunSession.from_run_dir` |
-| Coach actions in live mode (between turns) | partial | Channel post (`/coach/post`), vital nudge and parameter edit (`/edit/vital`, `/edit/parameter`), reflection (`/reflection`), skip-and-advance; **missing UI**: vital nudge controls in the runner templates (only API exists); **missing entirely**: event injection (F18), engine-rule edits (F19/F-PE7) |
+| Coach actions in live mode (between turns) | partial | Channel post (`/coach/post`), vital nudge and parameter edit (`/edit/vital`, `/edit/parameter`), reflection (`/reflection`), skip-and-advance; scenario editor now applies lock semantics + `coach_edit` timeline rows for editable mid-run fields; **missing entirely**: event injection (F18), engine-rule edits (F19/F-PE7) |
 | "Start new live run" CTA on home picker | not built | `/new` only reachable from inside the runner shell or by URL |
 | Judge scores in `results.json` | done | Parsed from `judge_report.md` sections; `mean_judge_score` per variant and batch |
 | Experiment judge default | done | `--judge auto`/`on`/`off` and `--no-judge`; auto when manifest run count ≤ `EXPERIMENT_AUTO_JUDGE_LIMIT` (default 12) |

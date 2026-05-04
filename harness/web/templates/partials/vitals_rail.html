@@ -1,6 +1,14 @@
 <div class="flex flex-col gap-3">
   <h3 class="text-xs font-bold uppercase text-[var(--color-text-muted)] tracking-wide">Vitals</h3>
   <p class="text-xs text-[var(--color-text-muted)]">Turn {{ effective_turn if effective_turn is not none else 'latest' }}</p>
+  <div class="panel panel-section">
+    <div class="text-xs font-semibold mb-1">Overall sentiment trend</div>
+    {% if sentiment_svg %}
+    <div class="sentiment-chart text-[var(--color-accent-jrpg-azure)]">{{ sentiment_svg|safe }}</div>
+    {% else %}
+    <div class="text-xs text-[var(--color-text-muted)]">No sentiment data yet.</div>
+    {% endif %}
+  </div>
   {% if characters %}
   <ul class="flex flex-col gap-3 list-none p-0 m-0">
     {% for cid, ch in characters.items() %}
@@ -20,6 +28,7 @@
         hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
         hx-target="#center-stage"
         hx-swap="innerHTML"
+        hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ cid)|urlencode }}"
       ></button>
       {% else %}
       <button
@@ -28,6 +37,7 @@
         hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
         hx-target="#center-stage"
         hx-swap="innerHTML"
+        hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ cid)|urlencode }}"
       >{{ (cid[:2])|upper }}</button>
       {% endif %}
       <div class="min-w-0 flex-1 text-sm">
@@ -41,6 +51,10 @@
             hx-swap="innerHTML"
             @click="inspectorOpen = true"
           >inspect</button>
+          <a
+            href="/runs/{{ bundle.url_path }}/inspect/character/{{ cid|urlencode }}?turn={{ effective_turn }}"
+            class="text-[0.65rem] text-[var(--color-accent)] hover:underline"
+          >full</a>
         </div>
         <div class="text-xs text-[var(--color-text-muted)] msg__handle">{{ meta.get('handle', '@' ~ cid) }}</div>
         <div class="text-xs text-[var(--color-text-muted)] mt-1">

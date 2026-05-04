@@ -1,0 +1,83 @@
+id: priority-conflict-coaching
+name: Priority conflict — leadership coaching wins
+version: "1.0"
+
+setting_file: setting.md
+best_practices_file: best_practices.yaml
+
+harness:
+  coach_mode: llm
+
+channels:
+  - id: team_room
+    name: "#eng-pilot"
+    type: open
+    member_ids:
+      - lia
+      - marcus
+      - dana
+
+teams:
+  - id: pilot
+    name: Pilot product trio
+    member_ids:
+      - lia
+      - marcus
+      - dana
+
+characters:
+  - id: lia
+    name: Lia Ortega
+    role: Product manager (stuck between leadership and eng)
+    markdown_file: characters/lia.md
+    initial_vitals:
+      energy: 62
+      motivation: 70
+      stress: 68
+  - id: marcus
+    name: Marcus Webb
+    role: Tech lead
+    markdown_file: characters/marcus.md
+    initial_vitals:
+      energy: 55
+      motivation: 65
+      stress: 74
+  - id: dana
+    name: Dana Frost
+    role: Senior engineer
+    markdown_file: characters/dana.md
+    initial_vitals:
+      energy: 60
+      motivation: 58
+      stress: 70
+
+# “Delivery” items create pressure; success is **not** finishing them—it is the two outcome items.
+work_items:
+  - id: D1
+    title: Patch production incident class + guardrails (leadership says “drop everything”)
+    state: doing
+    owner_id: marcus
+  - id: D2
+    title: Net-new upsell feature Sales promised for quarter-end
+    state: doing
+    owner_id: dana
+  - id: O1
+    title: Leadership priority reset — Director attends; publish one ranked list (deprioritize something explicitly)
+    state: backlog
+    owner_id: lia
+  - id: O2
+    title: Psychologically safe retro on overload and workload reduction — agenda + one team norm in writing
+    state: backlog
+    owner_id: lia
+
+org_initial_vitals:
+  delivery_progress: 0
+  happiness: 40
+
+goals:
+  max_turns: 14
+  require_done_ids:
+    - O1
+    - O2
+  max_stress_any: 80
+  abort_stress_any: 92

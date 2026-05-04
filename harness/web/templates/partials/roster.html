@@ -11,27 +11,41 @@
     {% set sprite_set = character_sprite_set(scenario, cid) %}
     {% set surl = sprite_url(sprite_set, expr) %}
     {% set meta = (char_meta or {}).get(cid, {}) %}
+    {% set active_items = roster_work_items|selectattr('owner_id', 'equalto', cid)|rejectattr('state', 'equalto', 'done')|list %}
+    {% set done_items = roster_work_items|selectattr('owner_id', 'equalto', cid)|selectattr('state', 'equalto', 'done')|list %}
+    {% set d = (roster_deltas or {}).get(cid, {}) %}
     <div class="panel panel-section flex flex-col items-center gap-2 p-3">
       {% if surl %}
       <button
         type="button"
-        class="sprite sprite--from-asset w-16 h-16 border-0 cursor-pointer p-0"
+        class="sprite sprite--from-asset sprite--lg border-0 cursor-pointer p-0"
         style="background-image: url('{{ surl }}')"
         hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
         hx-target="#center-stage"
         hx-swap="innerHTML"
+        hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ cid)|urlencode }}"
       ></button>
       {% else %}
       <button
         type="button"
-        class="sprite sprite--idle w-16 h-16 cursor-pointer"
+        class="sprite sprite--idle sprite--lg cursor-pointer"
         hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ ('dm/' ~ cid)|urlencode }}&turn={{ effective_turn }}"
         hx-target="#center-stage"
         hx-swap="innerHTML"
+        hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ ('dm/' ~ cid)|urlencode }}"
       >{{ (cid[:2])|upper }}</button>
       {% endif %}
       <div class="text-center text-sm font-semibold">{{ meta.get('name', cid) }}</div>
       <div class="text-[0.65rem] text-[var(--color-text-muted)] font-mono">{{ expr }}</div>
+      <div class="w-full text-[0.68rem] text-[var(--color-text-muted)]">
+        <div class="flex justify-between"><span>Active items</span><span>{{ active_items|length }}</span></div>
+        <div class="flex justify-between"><span>Done items</span><span>{{ done_items|length }}</span></div>
+      </div>
+      <div class="w-full text-[0.68rem] text-[var(--color-text-muted)]">
+        <div class="flex justify-between"><span>Energy Δ</span><span>{% if d.get('energy', 0) > 0 %}+{% endif %}{{ d.get('energy', 0) }}</span></div>
+        <div class="flex justify-between"><span>Motivation Δ</span><span>{% if d.get('motivation', 0) > 0 %}+{% endif %}{{ d.get('motivation', 0) }}</span></div>
+        <div class="flex justify-between"><span>Stress Δ</span><span>{% if d.get('stress', 0) > 0 %}+{% endif %}{{ d.get('stress', 0) }}</span></div>
+      </div>
       <button
         type="button"
         class="text-xs text-[var(--color-accent)] hover:underline"
@@ -40,6 +54,7 @@
         hx-swap="innerHTML"
         @click="inspectorOpen = true"
       >Inspect</button>
+      <a href="/runs/{{ bundle.url_path }}/inspect/character/{{ cid|urlencode }}?turn={{ effective_turn }}" class="text-xs text-[var(--color-accent)] hover:underline">Open full page</a>
     </div>
     {% else %}
     <p class="text-[var(--color-text-muted)] text-sm">No characters in this turn snapshot.</p>

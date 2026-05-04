@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ scenario.get('name', slug) }} — agile-sim{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/easymde/easymde.min.css" />
+<script defer src="/static/vendor/easymde/easymde.min.js"></script>
+<script defer src="/static/js/easymde-init.js"></script>
+{% endblock %}
+{% block body %}
+<div class="flex flex-col min-h-screen">
+  <header class="topbar shrink-0">
+    <div class="runner-topbar-inner">
+      <a href="/scenarios" class="topbar-back-link text-sm">← Scenarios</a>
+      <a href="/runs" class="nav-link text-sm">Runs</a>
+      <a href="/experiments" class="nav-link text-sm">Experiments</a>
+      <h1 class="text-base font-bold">{{ scenario.get('name', slug) }}</h1>
+      <span class="topbar-chip text-xs font-mono">{{ scenario.get('id', slug) }}</span>
+      {% if lock_state.run_in_progress %}
+      <span class="chip text-xs">live: {{ lock_state.run_id }} — some fields locked</span>
+      {% else %}
+      <span class="chip text-xs">pre-run</span>
+      {% endif %}
+      <div class="runner-topbar-actions">
+        <a href="/new?scenario={{ slug|urlencode }}" class="btn btn-ghost text-sm">Start live run</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex flex-1 min-h-0">
+    <aside class="app-rail w-[4.5rem] shrink-0 flex flex-col items-center py-4 gap-3">
+      <a href="/" class="app-rail__icon" title="Runs">Home</a>
+      <a href="/runs" class="app-rail__icon" title="Runs">Runs</a>
+      <a href="/scenarios" class="app-rail__icon app-rail__icon--active" title="Scenarios">Scenarios</a>
+      <a href="/experiments" class="app-rail__icon" title="Experiments">Experiments</a>
+      <a href="/new?scenario={{ slug|urlencode }}" class="app-rail__icon" title="New run">New run</a>
+    </aside>
+
+    <aside class="left-rail w-64 shrink-0 flex flex-col py-4 gap-3 overflow-y-auto">
+      <h2 class="left-rail__section-title px-3">Scenario editor</h2>
+      <nav class="flex flex-col gap-1 px-2">
+        {% for sec in sections %}
+        <button
+          type="button"
+          class="btn btn-ghost left-rail__btn justify-start text-left text-sm {% if sec == section %}left-rail__btn--active{% endif %}"
+          hx-get="/partials/scenario/{{ slug|urlencode }}/section/{{ sec }}"
+          hx-target="#scenario-center-stage"
+          hx-swap="innerHTML"
+        >{{ sec.replace('_', ' ')|title }}</button>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <main id="scenario-center-stage" class="flex-1 min-w-0 overflow-y-auto bg-[var(--color-bg-app)] p-4">
+      {% include "partials/scenario_editor/section_" ~ section ~ ".html" %}
+    </main>
+  </div>
+</div>
+{% endblock %}

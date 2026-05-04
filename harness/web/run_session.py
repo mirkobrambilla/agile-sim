@@ -405,6 +405,27 @@ class RunSession:
         )
         return p
 
+    def record_scenario_edit(
+        self,
+        *,
+        target: str,
+        payload: dict[str, Any],
+        effective_turn: int | None = None,
+    ) -> None:
+        """Append a structured coach_edit row for scenario-editor changes."""
+
+        eff = effective_turn if effective_turn is not None else self.world.turn + 1
+        _append_jsonl(
+            self.run_root / "timeline.jsonl",
+            {
+                "kind": "coach_edit",
+                "turn": self.world.turn,
+                "target": target,
+                "payload": payload,
+                "effective_turn": eff,
+            },
+        )
+
     def edit_vital(self, *, character_id: str, vital_name: str, delta: int, max_abs: int = 8) -> dict[str, Any]:
         cid = str(character_id).strip()
         vn = str(vital_name).strip()

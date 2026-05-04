@@ -1,13 +1,27 @@
 {% extends "base.html" %}
 {% block title %}New live run — agile-sim{% endblock %}
 {% block body %}
-<div class="max-w-4xl mx-auto p-6 flex flex-col gap-4">
-  <h1 class="text-xl font-bold">Start a live run</h1>
+{% set header_title = "Start a live run" %}
+{% set header_subtitle = "Create a run under " ~ runs_dir ~ " and open the runner." %}
+{% set header_max_width = "max-w-4xl" %}
+{% include "partials/site_header.html" %}
+<div class="max-w-4xl mx-auto p-6 flex flex-col gap-4" x-data="{ selectedScenario: {{ (selected_scenario or (scenarios[0].slug if scenarios else ''))|tojson }} }">
   <p class="text-sm text-[var(--color-text-muted)]">Creates a run under {{ runs_dir }} and opens the runner. Requires OpenRouter credentials in <code class="font-mono">secrets.yaml</code>.</p>
+  <div class="panel panel-section flex flex-wrap items-center justify-between gap-2 text-sm">
+    <span>Create a scenario first if you do not want to run an existing one.</span>
+    <div class="flex gap-2">
+      <a href="/scenarios/new" class="btn btn-primary text-xs">New scenario</a>
+      <template x-if="selectedScenario">
+        <form :action="'/scenarios/' + encodeURIComponent(selectedScenario) + '/copy_and_edit'" method="post">
+          <button type="submit" class="btn btn-ghost text-xs">Copy selected scenario & edit</button>
+        </form>
+      </template>
+    </div>
+  </div>
   <form method="post" action="/runs" class="flex flex-col gap-3">
     <label class="flex flex-col gap-1 text-sm">
       <span class="font-semibold">Scenario</span>
-      <select name="scenario_slug" required class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2">
+      <select name="scenario_slug" required class="border border-[var(--color-border)] rounded-[var(--radius-sm)] px-2 py-2" x-model="selectedScenario">
         {% for s in scenarios %}
         <option value="{{ s.slug }}" {% if selected_scenario and selected_scenario == s.slug %}selected{% endif %}>
           {{ s.name }} ({{ s.id }}) · {{ s.characters_count }} chars · {{ s.channels_count }} channels
@@ -47,6 +61,6 @@
     </label>
     <button type="submit" class="btn btn-primary mt-2">Create run</button>
   </form>
-  <p class="text-sm"><a href="/" class="text-[var(--color-accent)] hover:underline">← All runs</a></p>
+  <p class="text-sm"><a href="/runs" class="text-[var(--color-accent)] hover:underline">← Runs</a></p>
 </div>
 {% endblock %}

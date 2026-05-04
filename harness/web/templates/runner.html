@@ -1,20 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Run viewer — agile-sim{% endblock %}
 {% block head %}
-<script src="/static/js/runner-shell.js"></script>
-<script src="/static/js/channel-view.js"></script>
+<script src="/static/js/runner-shell.js?v=3"></script>
+<script src="/static/js/channel-view.js?v=3"></script>
 {% endblock %}
 {% block body %}
 {% set totals = bundle.summary.get('totals') or {} %}
 {% set cost = totals.get('cost') %}
 {% set scen = scenario if scenario is defined else {} %}
 <div
-  class="flex flex-col min-h-screen relative"
-  x-data="runnerShell({ liveTurn: {{ live_turn }}, viewingTurn: {{ effective_turn }}, defaultView: 'channels', channels: {{ bundle.channels|map(attribute='id')|list|tojson }}, currentChannel: {{ channel_query|tojson }}, attention: {{ channel_attention|tojson }} })"
+  class="flex flex-col h-screen relative {% if not live_session %}runner-shell--replay{% endif %}"
+  x-data="runnerShell({ liveTurn: {{ live_turn }}, viewingTurn: {{ effective_turn }}, defaultView: {{ current_view|tojson }}, channels: {{ bundle.channels|map(attribute='id')|list|tojson }}, currentChannel: {{ channel_query|tojson }}, attention: {{ channel_attention|tojson }}, runPath: {{ bundle.url_path|tojson }} })"
 >
-  <header class="topbar shrink-0">
+  <header class="topbar topbar--runner shrink-0">
     <div class="runner-topbar-inner">
-      <a href="/" class="text-sm text-[var(--color-text-muted)] hover:underline">← All runs</a>
+      {% if not live_session %}
+      <div class="relative">
+        <button
+          type="button"
+          class="hamburger-btn"
+          @click="navMenuOpen = !navMenuOpen"
+          :aria-expanded="navMenuOpen ? 'true' : 'false'"
+          aria-label="Open navigation menu"
+        >☰</button>
+        <nav class="nav-popover" x-show="navMenuOpen" x-cloak @click.outside="navMenuOpen = false">
+          <a href="/" class="nav-popover__item">Home</a>
+          <a href="/runs" class="nav-popover__item">Runs</a>
+          <a href="/scenarios" class="nav-popover__item">Scenarios</a>
+          <a href="/experiments" class="nav-popover__item">Experiments</a>
+          <a href="/new" class="nav-popover__item">New run</a>
+          <a href="/scenarios/new" class="nav-popover__item">New scenario</a>
+        </nav>
+      </div>
+      {% else %}
+      <a href="/runs" class="topbar-back-link text-sm">← Runs</a>
+      {% endif %}
       <h1 class="text-base font-bold font-[family-name:var(--font-mono)]">{{ bundle.run_dir.name }}</h1>
       {% if scen.get('id') %}
       <span class="topbar-chip text-[var(--color-text-muted)]">scenario <span class="font-mono text-[var(--color-text)]">{{ scen.get('id') }}</span></span>
@@ -32,12 +52,14 @@
         {% if start_turn > latest_turn - 3 %}{% set start_turn = latest_turn - 3 %}{% endif %}
         {% set end_turn = start_turn + 3 %}
       {% endif %}
+      {% set query_tail = '?view=' ~ current_view ~ '&channel=' ~ (channel_query|urlencode) %}
+      <span class="chip hud">Turn {{ effective_turn }} of {{ max_turn }}</span>
       <nav class="turn-nav" aria-label="Turn navigation">
-        <a class="turn-nav__arrow" href="/runs/{{ bundle.url_path }}/at/{{ prev_turn }}" title="Previous turn" aria-label="Previous turn">←</a>
+        <a class="turn-nav__arrow" href="/runs/{{ bundle.url_path }}/at/{{ prev_turn }}{{ query_tail }}" title="Previous turn" aria-label="Previous turn">←</a>
         {% for t in range(start_turn, end_turn + 1) %}
         <a
           class="turn-nav__pill {% if t == effective_turn %}turn-nav__pill--active{% endif %}"
-          href="/runs/{{ bundle.url_path }}/at/{{ t }}"
+          href="/runs/{{ bundle.url_path }}/at/{{ t }}{{ query_tail }}"
           aria-current="{% if t == effective_turn %}page{% else %}false{% endif %}"
         >{{ t }}</a>
         {% endfor %}
@@ -45,11 +67,11 @@
         <span class="turn-nav__dots">…</span>
         <a
           class="turn-nav__pill {% if latest_turn == effective_turn %}turn-nav__pill--active{% endif %}"
-          href="/runs/{{ bundle.url_path }}/at/{{ latest_turn }}"
+          href="/runs/{{ bundle.url_path }}/at/{{ latest_turn }}{{ query_tail }}"
           aria-current="{% if latest_turn == effective_turn %}page{% else %}false{% endif %}"
         >{{ latest_turn }}</a>
         {% endif %}
-        <a class="turn-nav__arrow" href="/runs/{{ bundle.url_path }}/at/{{ next_turn }}" title="Next turn" aria-label="Next turn">→</a>
+        <a class="turn-nav__arrow" href="/runs/{{ bundle.url_path }}/at/{{ next_turn }}{{ query_tail }}" title="Next turn" aria-label="Next turn">→</a>
       </nav>
       {% if goal_status == 'ok' %}
       <span class="stoplight stoplight--ok">On track</span>
@@ -67,7 +89,6 @@
       </span>
       {% endif %}
       <div class="runner-topbar-actions">
-      <span class="text-xs text-[var(--color-text-muted)]">turn {{ effective_turn }} / {{ max_turn }}</span>
       <span class="chip">
         Cost:
         {% if cost is not none %}
@@ -101,30 +122,42 @@
     </div>
     {% endif %}
   </header>
+  {% if not live_session %}
+  <div class="banner-replay">
+    Replay mode — viewing a finished run. <a href="/runs" class="underline">Back to runs</a>
+  </div>
+  {% endif %}
 
   <div class="flex flex-1 min-h-0">
-    <aside class="app-rail w-14 shrink-0 flex flex-col items-center py-4 gap-3">
-      <a href="/" class="app-rail__icon" title="Home" aria-label="Home">HM</a>
-      <a href="/new" class="app-rail__icon" title="New live run" aria-label="New live run">NR</a>
-      <span class="app-rail__icon app-rail__icon--active" title="Runner" aria-hidden="true">RN</span>
+    {% if live_session %}
+    <aside class="app-rail w-[4.5rem] shrink-0 flex flex-col items-center py-4 gap-3">
+      <a href="/" class="app-rail__icon" title="Home" aria-label="Home">Home</a>
+      <a href="/runs" class="app-rail__icon" title="Runs" aria-label="Runs">Runs</a>
+      <a href="/scenarios" class="app-rail__icon" title="Scenarios" aria-label="Scenarios">Scenarios</a>
+      <a href="/experiments" class="app-rail__icon" title="Experiments" aria-label="Experiments">Experiments</a>
+      <a href="/new" class="app-rail__icon" title="New live run" aria-label="New live run">New run</a>
+      <span class="app-rail__icon app-rail__icon--active" title="Runner" aria-hidden="true">Runner</span>
     </aside>
+    {% endif %}
 
-    <aside class="left-rail w-52 shrink-0 flex flex-col py-4 gap-4 overflow-y-auto">
+    <aside class="left-rail w-60 shrink-0 flex flex-col py-4 gap-4 overflow-y-auto">
       <div>
         <h2 class="left-rail__section-title px-3 mb-2">Channels</h2>
         <nav class="flex flex-col gap-1 px-2">
           {% for c in bundle.channels %}
-          {% set active_channel = (c.id == channel_query) %}
           <button
             type="button"
-            class="btn btn-ghost left-rail__btn justify-start text-left text-sm {% if active_channel %}left-rail__btn--active{% endif %}"
-            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ c.id|urlencode }}&turn={{ effective_turn }}"
+            class="btn btn-ghost left-rail__btn justify-start text-left text-sm"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ c.id|urlencode }}&turn={{ effective_turn }}&view=channels"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ c.id|urlencode }}"
             @click="setView('channels'); setChannel('{{ c.id }}')"
+            :class="{ 'left-rail__btn--active': currentView === 'channels' && currentChannel === '{{ c.id }}' }"
           >
-            <span class="channel-attention-dot" x-show="channelAttention && channelAttention['{{ c.id }}']"></span>
-            {{ c.label }}
+            <span class="channel-attention-dot" x-show="(channelAttention && channelAttention['{{ c.id }}']) || {{ (channel_unread_counts.get(c.id, 0) > 0)|tojson }}"></span>
+            <span class="truncate">{{ c.label }}</span>
+            <span class="channel-badge{% if channel_unread_counts.get(c.id, 0) > 0 %} channel-badge--unread{% endif %}">{{ channel_counts.get(c.id, 0) }}</span>
           </button>
           {% endfor %}
         </nav>
@@ -135,51 +168,82 @@
           <button
             type="button"
             class="btn btn-ghost justify-start text-sm"
-            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ channel_query|urlencode }}&turn={{ effective_turn }}"
+            hx-get="/partials/run/{{ bundle.url_path }}/channel?channel={{ channel_query|urlencode }}&turn={{ effective_turn }}&view=channels"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=channels&channel={{ channel_query|urlencode }}"
             @click="setView('channels')"
+            :class="{ 'left-rail__btn--active': currentView === 'channels' }"
           >Channels</button>
           <button
             type="button"
             class="btn btn-ghost justify-start text-sm"
-            hx-get="/partials/run/{{ bundle.url_path }}/kanban?turn={{ effective_turn }}"
+            hx-get="/partials/run/{{ bundle.url_path }}/kanban?turn={{ effective_turn }}&view=kanban&channel={{ channel_query|urlencode }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=kanban&channel={{ channel_query|urlencode }}"
             @click="setView('kanban')"
+            :class="{ 'left-rail__btn--active': currentView === 'kanban' }"
           >Kanban</button>
           <button
             type="button"
             class="btn btn-ghost justify-start text-sm"
-            hx-get="/partials/run/{{ bundle.url_path }}/roster?turn={{ effective_turn }}"
+            hx-get="/partials/run/{{ bundle.url_path }}/roster?turn={{ effective_turn }}&view=roster&channel={{ channel_query|urlencode }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=roster&channel={{ channel_query|urlencode }}"
             @click="setView('roster')"
+            :class="{ 'left-rail__btn--active': currentView === 'roster' }"
           >Roster</button>
           <button
             type="button"
             class="btn btn-ghost justify-start text-sm"
-            hx-get="/partials/run/{{ bundle.url_path }}/timeline?turn={{ effective_turn }}"
+            hx-get="/partials/run/{{ bundle.url_path }}/timeline?turn={{ effective_turn }}&view=timeline&channel={{ channel_query|urlencode }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=timeline&channel={{ channel_query|urlencode }}"
             @click="setView('timeline')"
+            :class="{ 'left-rail__btn--active': currentView === 'timeline' }"
           >Timeline</button>
           <button
             type="button"
             class="btn btn-ghost justify-start text-sm"
-            hx-get="/partials/run/{{ bundle.url_path }}/summary"
+            hx-get="/partials/run/{{ bundle.url_path }}/summary?view=summary&channel={{ channel_query|urlencode }}"
             hx-target="#center-stage"
             hx-swap="innerHTML"
+            hx-push-url="/runs/{{ bundle.url_path }}?view=summary&channel={{ channel_query|urlencode }}"
             @click="setView('summary')"
+            :class="{ 'left-rail__btn--active': currentView === 'summary' }"
           >Summary</button>
         </nav>
       </div>
     </aside>
 
-    <div id="center-stage" class="flex-1 min-w-0 overflow-y-auto bg-[var(--color-bg-app)] p-4">
-      {% set channel = channel_query %}
-      {% set messages = bundle.messages_by_channel[channel] if channel in bundle.messages_by_channel else [] %}
-      {% include "partials/channel_view.html" %}
+    <div id="center-stage" class="flex-1 min-w-0 min-h-0 bg-[var(--color-bg-app)] p-4 {% if current_view == 'channels' %}center-stage-shell{% else %}overflow-y-auto{% endif %}">
+      {% if current_view == 'kanban' %}
+        {% set world = snap_world or {} %}
+        {% set items = world.get('work_items') or [] %}
+        {% set columns = {'backlog': [], 'doing': [], 'done': [], 'parked': []} %}
+        {% for wi in items %}
+          {% set st = (wi.get('state') or 'backlog')|lower %}
+          {% if st in columns %}
+            {% set _ = columns[st].append(wi) %}
+          {% endif %}
+        {% endfor %}
+        {% include "partials/kanban.html" %}
+      {% elif current_view == 'roster' %}
+        {% set characters = (snap_world.get('characters') or {}) if snap_world else {} %}
+        {% include "partials/roster.html" %}
+      {% elif current_view == 'timeline' %}
+        {% set grouped_timeline = grouped_timeline if grouped_timeline is defined else [] %}
+        {% include "partials/timeline.html" %}
+      {% elif current_view == 'summary' %}
+        {% include "partials/summary.html" %}
+      {% else %}
+        {% set channel = channel_query %}
+        {% set messages = bundle.messages_by_channel[channel] if channel in bundle.messages_by_channel else [] %}
+        {% include "partials/channel_view.html" %}
+      {% endif %}
     </div>
 
     <aside class="right-rail w-72 shrink-0 flex flex-col gap-4 py-4 px-3 overflow-y-auto border-l border-[var(--color-border)] relative">
