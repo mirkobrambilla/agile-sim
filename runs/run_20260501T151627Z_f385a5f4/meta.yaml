@@ -1,0 +1,12 @@
+run_id: run_20260501T151627Z_f385a5f4
+harness_version: 0.0.1
+git_sha: unknown
+scenario_id: two-teams-shared-staging
+scenario_path: /Users/foz/src/agile-sim/scenarios/two-teams-shared-staging
+models:
+  agent: gemini-3-flash-preview
+  coach: gemini-3-flash-preview
+seed: null
+coach_mode: llm
+coach_preset_id: null
+coach_preset_path: null

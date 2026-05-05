@@ -1,0 +1,6 @@
+{"turn": 1, "role": "agent", "character": "priya", "model": "stub", "usage": {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}, "latency_ms": 279}
+{"turn": 1, "role": "agent", "character": "marcus", "model": "stub", "usage": {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}, "latency_ms": 45}
+{"turn": 1, "role": "agent", "character": "lin", "model": "stub", "usage": {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}, "latency_ms": 43}
+{"turn": 2, "role": "agent", "character": "priya", "model": "stub", "usage": {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}, "latency_ms": 67}
+{"turn": 2, "role": "agent", "character": "marcus", "model": "stub", "usage": {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}, "latency_ms": 45}
+{"turn": 2, "role": "agent", "character": "lin", "model": "stub", "usage": {"input_tokens": 0, "output_tokens": 0, "cost": 0.0}, "latency_ms": 47}

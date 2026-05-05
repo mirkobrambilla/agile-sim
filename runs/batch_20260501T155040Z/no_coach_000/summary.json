@@ -1,0 +1,41 @@
+{
+  "run_id": "no_coach_000",
+  "final_turn": 6,
+  "goal_met": true,
+  "aborted_stress": false,
+  "work_done": 6,
+  "final_vitals": {
+    "alex": {
+      "energy": 42,
+      "motivation": 82,
+      "stress": 82
+    },
+    "jordan": {
+      "energy": 45,
+      "motivation": 88,
+      "stress": 67
+    },
+    "sam": {
+      "energy": 48,
+      "motivation": 95,
+      "stress": 74
+    },
+    "riley": {
+      "energy": 52,
+      "motivation": 90,
+      "stress": 58
+    }
+  },
+  "org": {
+    "delivery_progress": 100,
+    "happiness": 88
+  },
+  "coach_mode": "none",
+  "coach_preset_id": null,
+  "totals": {
+    "input_tokens": 38226,
+    "output_tokens": 6052,
+    "cost": 0.037269,
+    "elapsed_s": 114.079
+  }
+}

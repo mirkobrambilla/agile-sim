@@ -1,0 +1,13 @@
+run_id: no_coach_004
+harness_version: 0.0.1
+git_sha: unknown
+scenario_id: priority-conflict-coaching
+scenario_path: /Users/foz/src/agile-sim/scenarios/priority-conflict-coaching
+models:
+  agent: google/gemini-3-flash-preview
+  coach: google/gemini-3-flash-preview
+seed: 7104
+variant_name: no_coach
+coach_mode: none
+coach_preset_id: null
+coach_preset_path: null

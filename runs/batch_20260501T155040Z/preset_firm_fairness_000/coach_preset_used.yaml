@@ -1,0 +1,29 @@
+id: firm_fairness
+description: |
+  Stronger directive tone: explicit arbitration, leadership-visible commitments,
+  and consequences for queue-jumping.
+
+turns:
+  "1":
+    narrative: "Set arbitration and visibility rules early."
+    channel_posts:
+      - content: |
+          Process: **one staging calendar** visible to both leads. Falcon and Raven each nominate
+          a single bottleneck owner for soak prep. No weekend booking without both leads + me
+          acknowledging the slot in this thread. If you cannot agree by turn 4, I will assign
+          Falcon→Raven ordering for the soak based on board risk (document rationale here).
+
+  "2":
+    narrative: "Reduce escalation spirals."
+    channel_posts:
+      - content: |
+          Avoid labeling the other team as “the blocker.” State facts: dependency, date, risk.
+          If you need exec air-cover, say so once with options—don't litigate personalities.
+
+  "4":
+    narrative: "Mid-run accountability."
+    channel_posts:
+      - content: |
+          Quick pulse: @alex and @sam — reply with **one** sentence each on who has the staging
+          slot next and what slips if you yield. If either reply is missing in-thread by next turn,
+          we're defaulting to the published queue order from my earlier note.

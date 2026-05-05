@@ -1,0 +1,41 @@
+{
+  "run_id": "preset_agile_light_000",
+  "final_turn": 6,
+  "goal_met": false,
+  "aborted_stress": true,
+  "work_done": 3,
+  "final_vitals": {
+    "alex": {
+      "energy": 42,
+      "motivation": 67,
+      "stress": 96
+    },
+    "jordan": {
+      "energy": 50,
+      "motivation": 72,
+      "stress": 85
+    },
+    "sam": {
+      "energy": 45,
+      "motivation": 100,
+      "stress": 67
+    },
+    "riley": {
+      "energy": 52,
+      "motivation": 74,
+      "stress": 58
+    }
+  },
+  "org": {
+    "delivery_progress": 50,
+    "happiness": 78
+  },
+  "coach_mode": "preset",
+  "coach_preset_id": "agile_light",
+  "totals": {
+    "input_tokens": 39631,
+    "output_tokens": 6111,
+    "cost": 0.0381485,
+    "elapsed_s": 99.981
+  }
+}

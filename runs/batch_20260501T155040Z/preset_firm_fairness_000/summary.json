@@ -1,0 +1,41 @@
+{
+  "run_id": "preset_firm_fairness_000",
+  "final_turn": 7,
+  "goal_met": false,
+  "aborted_stress": true,
+  "work_done": 5,
+  "final_vitals": {
+    "alex": {
+      "energy": 36,
+      "motivation": 88,
+      "stress": 97
+    },
+    "jordan": {
+      "energy": 40,
+      "motivation": 88,
+      "stress": 76
+    },
+    "sam": {
+      "energy": 40,
+      "motivation": 85,
+      "stress": 97
+    },
+    "riley": {
+      "energy": 45,
+      "motivation": 81,
+      "stress": 75
+    }
+  },
+  "org": {
+    "delivery_progress": 83,
+    "happiness": 85
+  },
+  "coach_mode": "preset",
+  "coach_preset_id": "firm_fairness",
+  "totals": {
+    "input_tokens": 45782,
+    "output_tokens": 6939,
+    "cost": 0.043708,
+    "elapsed_s": 120.291
+  }
+}

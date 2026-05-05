@@ -1,0 +1,70 @@
+{
+  "batch_dir": "batch_20260501T172907Z",
+  "n_runs_with_summary": 2,
+  "all_manifest_runs_ok": true,
+  "variants": [
+    {
+      "name": "llm_coach",
+      "n_runs": 1,
+      "goals_met": 1,
+      "goal_rate": 1.0,
+      "stress_abort_rate": 0.0,
+      "mean_cost_usd": 0.06264300000000002,
+      "stdev_cost_usd": 0.0,
+      "mean_work_done": 3,
+      "mean_final_turn": 8,
+      "runs": [
+        {
+          "path": "llm_coach_000",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 8,
+          "cost": 0.06264300000000002,
+          "coach_mode": "llm"
+        }
+      ]
+    },
+    {
+      "name": "no_coach",
+      "n_runs": 1,
+      "goals_met": 1,
+      "goal_rate": 1.0,
+      "stress_abort_rate": 0.0,
+      "mean_cost_usd": 0.0333295,
+      "stdev_cost_usd": 0.0,
+      "mean_work_done": 3,
+      "mean_final_turn": 7,
+      "runs": [
+        {
+          "path": "no_coach_000",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.0333295,
+          "coach_mode": "none"
+        }
+      ]
+    }
+  ],
+  "manifest": {
+    "batch_id": "batch_20260501T172907Z",
+    "matrix_file": "/Users/foz/src/agile-sim/experiments/priority_coach_matrix.yaml",
+    "scenario_dir": "/Users/foz/src/agile-sim/scenarios/priority-conflict-coaching",
+    "runs": [
+      {
+        "path": "llm_coach_000",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_000",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      }
+    ]
+  }
+}

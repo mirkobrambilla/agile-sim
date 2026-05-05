@@ -1,0 +1,36 @@
+{
+  "run_id": "no_coach_003",
+  "final_turn": 5,
+  "goal_met": false,
+  "aborted_stress": true,
+  "work_done": 0,
+  "final_vitals": {
+    "lia": {
+      "energy": 44,
+      "motivation": 85,
+      "stress": 95
+    },
+    "marcus": {
+      "energy": 43,
+      "motivation": 82,
+      "stress": 64
+    },
+    "dana": {
+      "energy": 46,
+      "motivation": 75,
+      "stress": 63
+    }
+  },
+  "org": {
+    "delivery_progress": 0,
+    "happiness": 80
+  },
+  "coach_mode": "none",
+  "coach_preset_id": null,
+  "totals": {
+    "input_tokens": 24061,
+    "output_tokens": 3869,
+    "cost": 0.023637500000000002,
+    "elapsed_s": 59.674
+  }
+}

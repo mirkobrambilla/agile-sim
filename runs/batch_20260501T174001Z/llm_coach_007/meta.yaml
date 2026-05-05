@@ -1,0 +1,13 @@
+run_id: llm_coach_007
+harness_version: 0.0.1
+git_sha: unknown
+scenario_id: priority-conflict-coaching
+scenario_path: /Users/foz/src/agile-sim/scenarios/priority-conflict-coaching
+models:
+  agent: google/gemini-3-flash-preview
+  coach: google/gemini-3-flash-preview
+seed: 7117
+variant_name: llm_coach
+coach_mode: llm
+coach_preset_id: null
+coach_preset_path: null

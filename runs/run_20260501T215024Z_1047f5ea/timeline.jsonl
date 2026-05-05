@@ -1,0 +1,19 @@
+{"kind": "run_start", "scenario_id": "two-devs-and-a-pm", "agent_model": "stub", "coach_model": "stub", "coach_mode": "llm", "coach_preset_id": null, "seed": null, "live_session": true}
+{"kind": "turn_start", "turn": 1}
+{"kind": "parse_error", "turn": 1, "who": "priya", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "agent_turn", "turn": 1, "character": "priya", "narrative": "(agent call failed)", "posts": [], "vital_deltas": {}, "work_updates": []}
+{"kind": "parse_error", "turn": 1, "who": "marcus", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "agent_turn", "turn": 1, "character": "marcus", "narrative": "(agent call failed)", "posts": [], "vital_deltas": {}, "work_updates": []}
+{"kind": "parse_error", "turn": 1, "who": "lin", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "agent_turn", "turn": 1, "character": "lin", "narrative": "(agent call failed)", "posts": [], "vital_deltas": {}, "work_updates": []}
+{"kind": "parse_error", "turn": 1, "who": "coach", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "coach_turn", "turn": 1, "source": "llm", "narrative": "", "nudges": [], "posts": []}
+{"kind": "turn_start", "turn": 2}
+{"kind": "parse_error", "turn": 2, "who": "priya", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "agent_turn", "turn": 2, "character": "priya", "narrative": "(agent call failed)", "posts": [], "vital_deltas": {}, "work_updates": []}
+{"kind": "parse_error", "turn": 2, "who": "marcus", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "agent_turn", "turn": 2, "character": "marcus", "narrative": "(agent call failed)", "posts": [], "vital_deltas": {}, "work_updates": []}
+{"kind": "parse_error", "turn": 2, "who": "lin", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "agent_turn", "turn": 2, "character": "lin", "narrative": "(agent call failed)", "posts": [], "vital_deltas": {}, "work_updates": []}
+{"kind": "parse_error", "turn": 2, "who": "coach", "error": "Client error '400 Bad Request' for url 'https://openrouter.ai/api/v1/chat/completions'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400"}
+{"kind": "coach_turn", "turn": 2, "source": "llm", "narrative": "", "nudges": [], "posts": []}

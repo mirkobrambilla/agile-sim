@@ -1,0 +1,34 @@
+{
+  "run_id": "run_20260501T145051Z_2298ecc1",
+  "final_turn": 5,
+  "goal_met": true,
+  "aborted_stress": false,
+  "work_done": 4,
+  "final_vitals": {
+    "priya": {
+      "energy": 47,
+      "motivation": 88,
+      "stress": 73
+    },
+    "marcus": {
+      "energy": 45,
+      "motivation": 85,
+      "stress": 59
+    },
+    "lin": {
+      "energy": 58,
+      "motivation": 98,
+      "stress": 59
+    }
+  },
+  "org": {
+    "delivery_progress": 80,
+    "happiness": 90
+  },
+  "totals": {
+    "input_tokens": 26411,
+    "output_tokens": 4413,
+    "cost": 0.026444500000000003,
+    "elapsed_s": 92.364
+  }
+}

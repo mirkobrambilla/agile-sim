@@ -1,0 +1,36 @@
+{
+  "run_id": "llm_coach_001",
+  "final_turn": 6,
+  "goal_met": true,
+  "aborted_stress": false,
+  "work_done": 3,
+  "final_vitals": {
+    "lia": {
+      "energy": 69,
+      "motivation": 100,
+      "stress": 28
+    },
+    "marcus": {
+      "energy": 56,
+      "motivation": 99,
+      "stress": 24
+    },
+    "dana": {
+      "energy": 71,
+      "motivation": 98,
+      "stress": 30
+    }
+  },
+  "org": {
+    "delivery_progress": 75,
+    "happiness": 99
+  },
+  "coach_mode": "llm",
+  "coach_preset_id": null,
+  "totals": {
+    "input_tokens": 47687,
+    "output_tokens": 7146,
+    "cost": 0.045281499999999995,
+    "elapsed_s": 62.851
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "batch_dir": "batch_20260501T174001Z",
+  "n_runs_with_summary": 20,
+  "all_manifest_runs_ok": true,
+  "variants": [
+    {
+      "name": "llm_coach",
+      "n_runs": 10,
+      "goals_met": 10,
+      "goal_rate": 1.0,
+      "stress_abort_rate": 0.0,
+      "mean_cost_usd": 0.04840205,
+      "stdev_cost_usd": 0.004234698817212389,
+      "mean_work_done": 2.9,
+      "mean_final_turn": 6.4,
+      "runs": [
+        {
+          "path": "llm_coach_000",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 6,
+          "cost": 0.044872999999999996,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_001",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 6,
+          "cost": 0.045281499999999995,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_002",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.054524500000000004,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_003",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 6,
+          "cost": 0.044476,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_004",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.053638,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_005",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.05237300000000002,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_006",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 6,
+          "cost": 0.04593200000000001,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_007",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 2,
+          "final_turn": 6,
+          "cost": 0.043994000000000005,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_008",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.05354249999999999,
+          "coach_mode": "llm"
+        },
+        {
+          "path": "llm_coach_009",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 6,
+          "cost": 0.045385999999999996,
+          "coach_mode": "llm"
+        }
+      ]
+    },
+    {
+      "name": "no_coach",
+      "n_runs": 10,
+      "goals_met": 6,
+      "goal_rate": 0.6,
+      "stress_abort_rate": 0.4,
+      "mean_cost_usd": 0.028111399999999998,
+      "stdev_cost_usd": 0.004327900956583918,
+      "mean_work_done": 1.6,
+      "mean_final_turn": 5.9,
+      "runs": [
+        {
+          "path": "no_coach_000",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 2,
+          "final_turn": 6,
+          "cost": 0.028741999999999993,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_001",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.032605,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_002",
+          "goal_met": false,
+          "aborted_stress": true,
+          "work_done": 0,
+          "final_turn": 5,
+          "cost": 0.022945499999999997,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_003",
+          "goal_met": false,
+          "aborted_stress": true,
+          "work_done": 0,
+          "final_turn": 5,
+          "cost": 0.023637500000000002,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_004",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.0339815,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_005",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 6,
+          "cost": 0.028615500000000002,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_006",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 3,
+          "final_turn": 7,
+          "cost": 0.034689,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_007",
+          "goal_met": false,
+          "aborted_stress": true,
+          "work_done": 0,
+          "final_turn": 5,
+          "cost": 0.0233445,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_008",
+          "goal_met": true,
+          "aborted_stress": false,
+          "work_done": 2,
+          "final_turn": 6,
+          "cost": 0.028785,
+          "coach_mode": "none"
+        },
+        {
+          "path": "no_coach_009",
+          "goal_met": false,
+          "aborted_stress": true,
+          "work_done": 0,
+          "final_turn": 5,
+          "cost": 0.0237685,
+          "coach_mode": "none"
+        }
+      ]
+    }
+  ],
+  "manifest": {
+    "batch_id": "batch_20260501T174001Z",
+    "matrix_file": "/Users/foz/src/agile-sim/experiments/priority_coach_matrix.yaml",
+    "scenario_dir": "/Users/foz/src/agile-sim/scenarios/priority-conflict-coaching",
+    "runs": [
+      {
+        "path": "llm_coach_000",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_001",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_002",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_003",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_004",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_005",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_006",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_007",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_008",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "llm_coach_009",
+        "ok": true,
+        "variant_name": "llm_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_000",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_001",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_002",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_003",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_004",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_005",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_006",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_007",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_008",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      },
+      {
+        "path": "no_coach_009",
+        "ok": true,
+        "variant_name": "no_coach",
+        "error": null
+      }
+    ]
+  }
+}

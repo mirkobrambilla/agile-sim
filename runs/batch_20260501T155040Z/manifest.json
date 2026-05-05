@@ -1,0 +1,152 @@
+{
+  "batch_id": "batch_20260501T155040Z",
+  "matrix_file": "/Users/foz/src/agile-sim/experiments/coaching_ab_matrix.yaml",
+  "scenario_dir": "/Users/foz/src/agile-sim/scenarios/two-teams-shared-staging",
+  "variants": [],
+  "runs": [
+    {
+      "variant_name": "no_coach",
+      "run_index": 0,
+      "run_id": "no_coach_000",
+      "path": "no_coach_000",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_000",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 6,
+        "final_vitals": {
+          "alex": {
+            "energy": 42,
+            "motivation": 82,
+            "stress": 82
+          },
+          "jordan": {
+            "energy": 45,
+            "motivation": 88,
+            "stress": 67
+          },
+          "sam": {
+            "energy": 48,
+            "motivation": 95,
+            "stress": 74
+          },
+          "riley": {
+            "energy": 52,
+            "motivation": 90,
+            "stress": 58
+          }
+        },
+        "org": {
+          "delivery_progress": 100,
+          "happiness": 88
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 38226,
+          "output_tokens": 6052,
+          "cost": 0.037269,
+          "elapsed_s": 114.079
+        }
+      }
+    },
+    {
+      "variant_name": "preset_agile_light",
+      "run_index": 0,
+      "run_id": "preset_agile_light_000",
+      "path": "preset_agile_light_000",
+      "ok": true,
+      "summary": {
+        "run_id": "preset_agile_light_000",
+        "final_turn": 6,
+        "goal_met": false,
+        "aborted_stress": true,
+        "work_done": 3,
+        "final_vitals": {
+          "alex": {
+            "energy": 42,
+            "motivation": 67,
+            "stress": 96
+          },
+          "jordan": {
+            "energy": 50,
+            "motivation": 72,
+            "stress": 85
+          },
+          "sam": {
+            "energy": 45,
+            "motivation": 100,
+            "stress": 67
+          },
+          "riley": {
+            "energy": 52,
+            "motivation": 74,
+            "stress": 58
+          }
+        },
+        "org": {
+          "delivery_progress": 50,
+          "happiness": 78
+        },
+        "coach_mode": "preset",
+        "coach_preset_id": "agile_light",
+        "totals": {
+          "input_tokens": 39631,
+          "output_tokens": 6111,
+          "cost": 0.0381485,
+          "elapsed_s": 99.981
+        }
+      }
+    },
+    {
+      "variant_name": "preset_firm_fairness",
+      "run_index": 0,
+      "run_id": "preset_firm_fairness_000",
+      "path": "preset_firm_fairness_000",
+      "ok": true,
+      "summary": {
+        "run_id": "preset_firm_fairness_000",
+        "final_turn": 7,
+        "goal_met": false,
+        "aborted_stress": true,
+        "work_done": 5,
+        "final_vitals": {
+          "alex": {
+            "energy": 36,
+            "motivation": 88,
+            "stress": 97
+          },
+          "jordan": {
+            "energy": 40,
+            "motivation": 88,
+            "stress": 76
+          },
+          "sam": {
+            "energy": 40,
+            "motivation": 85,
+            "stress": 97
+          },
+          "riley": {
+            "energy": 45,
+            "motivation": 81,
+            "stress": 75
+          }
+        },
+        "org": {
+          "delivery_progress": 83,
+          "happiness": 85
+        },
+        "coach_mode": "preset",
+        "coach_preset_id": "firm_fairness",
+        "totals": {
+          "input_tokens": 45782,
+          "output_tokens": 6939,
+          "cost": 0.043708,
+          "elapsed_s": 120.291
+        }
+      }
+    }
+  ]
+}

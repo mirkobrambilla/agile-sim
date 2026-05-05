@@ -1,0 +1,94 @@
+{
+  "batch_id": "batch_20260501T172907Z",
+  "matrix_file": "/Users/foz/src/agile-sim/experiments/priority_coach_matrix.yaml",
+  "scenario_dir": "/Users/foz/src/agile-sim/scenarios/priority-conflict-coaching",
+  "variants": [],
+  "runs": [
+    {
+      "variant_name": "llm_coach",
+      "run_index": 0,
+      "run_id": "llm_coach_000",
+      "path": "llm_coach_000",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_000",
+        "final_turn": 8,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 60,
+            "motivation": 100,
+            "stress": 25
+          },
+          "marcus": {
+            "energy": 66,
+            "motivation": 100,
+            "stress": 24
+          },
+          "dana": {
+            "energy": 75,
+            "motivation": 98,
+            "stress": 27
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 99
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 67974,
+          "output_tokens": 9552,
+          "cost": 0.06264300000000002,
+          "elapsed_s": 113.485
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 0,
+      "run_id": "no_coach_000",
+      "path": "no_coach_000",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_000",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 45,
+            "motivation": 100,
+            "stress": 53
+          },
+          "marcus": {
+            "energy": 66,
+            "motivation": 100,
+            "stress": 45
+          },
+          "dana": {
+            "energy": 75,
+            "motivation": 93,
+            "stress": 40
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 97
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 35291,
+          "output_tokens": 5228,
+          "cost": 0.0333295,
+          "elapsed_s": 53.192
+        }
+      }
+    }
+  ]
+}

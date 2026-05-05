@@ -1,0 +1,868 @@
+{
+  "batch_id": "batch_20260501T174001Z",
+  "matrix_file": "/Users/foz/src/agile-sim/experiments/priority_coach_matrix.yaml",
+  "scenario_dir": "/Users/foz/src/agile-sim/scenarios/priority-conflict-coaching",
+  "variants": [],
+  "runs": [
+    {
+      "variant_name": "llm_coach",
+      "run_index": 0,
+      "run_id": "llm_coach_000",
+      "path": "llm_coach_000",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_000",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 60,
+            "motivation": 95,
+            "stress": 28
+          },
+          "marcus": {
+            "energy": 65,
+            "motivation": 100,
+            "stress": 25
+          },
+          "dana": {
+            "energy": 76,
+            "motivation": 98,
+            "stress": 28
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 97
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 47068,
+          "output_tokens": 7113,
+          "cost": 0.044872999999999996,
+          "elapsed_s": 99.142
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 1,
+      "run_id": "llm_coach_001",
+      "path": "llm_coach_001",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_001",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 69,
+            "motivation": 100,
+            "stress": 28
+          },
+          "marcus": {
+            "energy": 56,
+            "motivation": 99,
+            "stress": 24
+          },
+          "dana": {
+            "energy": 71,
+            "motivation": 98,
+            "stress": 30
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 99
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 47687,
+          "output_tokens": 7146,
+          "cost": 0.045281499999999995,
+          "elapsed_s": 62.851
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 2,
+      "run_id": "llm_coach_002",
+      "path": "llm_coach_002",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_002",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 65,
+            "motivation": 100,
+            "stress": 12
+          },
+          "marcus": {
+            "energy": 69,
+            "motivation": 100,
+            "stress": 18
+          },
+          "dana": {
+            "energy": 73,
+            "motivation": 100,
+            "stress": 18
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 100
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 58523,
+          "output_tokens": 8421,
+          "cost": 0.054524500000000004,
+          "elapsed_s": 98.514
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 3,
+      "run_id": "llm_coach_003",
+      "path": "llm_coach_003",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_003",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 58,
+            "motivation": 100,
+            "stress": 26
+          },
+          "marcus": {
+            "energy": 61,
+            "motivation": 100,
+            "stress": 26
+          },
+          "dana": {
+            "energy": 69,
+            "motivation": 91,
+            "stress": 26
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 97
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 46544,
+          "output_tokens": 7068,
+          "cost": 0.044476,
+          "elapsed_s": 83.176
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 4,
+      "run_id": "llm_coach_004",
+      "path": "llm_coach_004",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_004",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 56,
+            "motivation": 100,
+            "stress": 17
+          },
+          "marcus": {
+            "energy": 60,
+            "motivation": 100,
+            "stress": 28
+          },
+          "dana": {
+            "energy": 74,
+            "motivation": 95,
+            "stress": 31
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 98
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 56738,
+          "output_tokens": 8423,
+          "cost": 0.053638,
+          "elapsed_s": 165.975
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 5,
+      "run_id": "llm_coach_005",
+      "path": "llm_coach_005",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_005",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 53,
+            "motivation": 100,
+            "stress": 10
+          },
+          "marcus": {
+            "energy": 73,
+            "motivation": 100,
+            "stress": 24
+          },
+          "dana": {
+            "energy": 79,
+            "motivation": 100,
+            "stress": 23
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 100
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 55666,
+          "output_tokens": 8180,
+          "cost": 0.05237300000000002,
+          "elapsed_s": 168.494
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 6,
+      "run_id": "llm_coach_006",
+      "path": "llm_coach_006",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_006",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 58,
+            "motivation": 100,
+            "stress": 30
+          },
+          "marcus": {
+            "energy": 67,
+            "motivation": 100,
+            "stress": 40
+          },
+          "dana": {
+            "energy": 71,
+            "motivation": 94,
+            "stress": 31
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 98
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 47542,
+          "output_tokens": 7387,
+          "cost": 0.04593200000000001,
+          "elapsed_s": 78.762
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 7,
+      "run_id": "llm_coach_007",
+      "path": "llm_coach_007",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_007",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 2,
+        "final_vitals": {
+          "lia": {
+            "energy": 49,
+            "motivation": 100,
+            "stress": 32
+          },
+          "marcus": {
+            "energy": 68,
+            "motivation": 100,
+            "stress": 33
+          },
+          "dana": {
+            "energy": 71,
+            "motivation": 94,
+            "stress": 35
+          }
+        },
+        "org": {
+          "delivery_progress": 50,
+          "happiness": 98
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 46474,
+          "output_tokens": 6919,
+          "cost": 0.043994000000000005,
+          "elapsed_s": 75.988
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 8,
+      "run_id": "llm_coach_008",
+      "path": "llm_coach_008",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_008",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 64,
+            "motivation": 100,
+            "stress": 23
+          },
+          "marcus": {
+            "energy": 63,
+            "motivation": 100,
+            "stress": 28
+          },
+          "dana": {
+            "energy": 74,
+            "motivation": 100,
+            "stress": 28
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 100
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 57135,
+          "output_tokens": 8325,
+          "cost": 0.05354249999999999,
+          "elapsed_s": 143.843
+        }
+      }
+    },
+    {
+      "variant_name": "llm_coach",
+      "run_index": 9,
+      "run_id": "llm_coach_009",
+      "path": "llm_coach_009",
+      "ok": true,
+      "summary": {
+        "run_id": "llm_coach_009",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 57,
+            "motivation": 100,
+            "stress": 28
+          },
+          "marcus": {
+            "energy": 65,
+            "motivation": 100,
+            "stress": 34
+          },
+          "dana": {
+            "energy": 69,
+            "motivation": 97,
+            "stress": 22
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 99
+        },
+        "coach_mode": "llm",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 48034,
+          "output_tokens": 7123,
+          "cost": 0.045385999999999996,
+          "elapsed_s": 97.564
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 0,
+      "run_id": "no_coach_000",
+      "path": "no_coach_000",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_000",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 2,
+        "final_vitals": {
+          "lia": {
+            "energy": 60,
+            "motivation": 98,
+            "stress": 59
+          },
+          "marcus": {
+            "energy": 67,
+            "motivation": 99,
+            "stress": 43
+          },
+          "dana": {
+            "energy": 75,
+            "motivation": 90,
+            "stress": 40
+          }
+        },
+        "org": {
+          "delivery_progress": 50,
+          "happiness": 95
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 29854,
+          "output_tokens": 4605,
+          "cost": 0.028741999999999993,
+          "elapsed_s": 55.433
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 1,
+      "run_id": "no_coach_001",
+      "path": "no_coach_001",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_001",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 44,
+            "motivation": 100,
+            "stress": 76
+          },
+          "marcus": {
+            "energy": 50,
+            "motivation": 100,
+            "stress": 42
+          },
+          "dana": {
+            "energy": 58,
+            "motivation": 93,
+            "stress": 42
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 97
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 35702,
+          "output_tokens": 4918,
+          "cost": 0.032605,
+          "elapsed_s": 72.627
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 2,
+      "run_id": "no_coach_002",
+      "path": "no_coach_002",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_002",
+        "final_turn": 5,
+        "goal_met": false,
+        "aborted_stress": true,
+        "work_done": 0,
+        "final_vitals": {
+          "lia": {
+            "energy": 45,
+            "motivation": 85,
+            "stress": 93
+          },
+          "marcus": {
+            "energy": 40,
+            "motivation": 85,
+            "stress": 62
+          },
+          "dana": {
+            "energy": 48,
+            "motivation": 81,
+            "stress": 58
+          }
+        },
+        "org": {
+          "delivery_progress": 0,
+          "happiness": 83
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 24009,
+          "output_tokens": 3647,
+          "cost": 0.022945499999999997,
+          "elapsed_s": 67.529
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 3,
+      "run_id": "no_coach_003",
+      "path": "no_coach_003",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_003",
+        "final_turn": 5,
+        "goal_met": false,
+        "aborted_stress": true,
+        "work_done": 0,
+        "final_vitals": {
+          "lia": {
+            "energy": 44,
+            "motivation": 85,
+            "stress": 95
+          },
+          "marcus": {
+            "energy": 43,
+            "motivation": 82,
+            "stress": 64
+          },
+          "dana": {
+            "energy": 46,
+            "motivation": 75,
+            "stress": 63
+          }
+        },
+        "org": {
+          "delivery_progress": 0,
+          "happiness": 80
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 24061,
+          "output_tokens": 3869,
+          "cost": 0.023637500000000002,
+          "elapsed_s": 59.674
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 4,
+      "run_id": "no_coach_004",
+      "path": "no_coach_004",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_004",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 54,
+            "motivation": 100,
+            "stress": 67
+          },
+          "marcus": {
+            "energy": 59,
+            "motivation": 100,
+            "stress": 56
+          },
+          "dana": {
+            "energy": 64,
+            "motivation": 95,
+            "stress": 37
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 98
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 36301,
+          "output_tokens": 5277,
+          "cost": 0.0339815,
+          "elapsed_s": 55.135
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 5,
+      "run_id": "no_coach_005",
+      "path": "no_coach_005",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_005",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 48,
+            "motivation": 100,
+            "stress": 56
+          },
+          "marcus": {
+            "energy": 62,
+            "motivation": 97,
+            "stress": 45
+          },
+          "dana": {
+            "energy": 71,
+            "motivation": 92,
+            "stress": 43
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 96
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 29775,
+          "output_tokens": 4576,
+          "cost": 0.028615500000000002,
+          "elapsed_s": 69.567
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 6,
+      "run_id": "no_coach_006",
+      "path": "no_coach_006",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_006",
+        "final_turn": 7,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 3,
+        "final_vitals": {
+          "lia": {
+            "energy": 55,
+            "motivation": 100,
+            "stress": 64
+          },
+          "marcus": {
+            "energy": 60,
+            "motivation": 98,
+            "stress": 41
+          },
+          "dana": {
+            "energy": 71,
+            "motivation": 94,
+            "stress": 38
+          }
+        },
+        "org": {
+          "delivery_progress": 75,
+          "happiness": 97
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 36720,
+          "output_tokens": 5443,
+          "cost": 0.034689,
+          "elapsed_s": 84.434
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 7,
+      "run_id": "no_coach_007",
+      "path": "no_coach_007",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_007",
+        "final_turn": 5,
+        "goal_met": false,
+        "aborted_stress": true,
+        "work_done": 0,
+        "final_vitals": {
+          "lia": {
+            "energy": 44,
+            "motivation": 90,
+            "stress": 98
+          },
+          "marcus": {
+            "energy": 40,
+            "motivation": 88,
+            "stress": 58
+          },
+          "dana": {
+            "energy": 48,
+            "motivation": 75,
+            "stress": 57
+          }
+        },
+        "org": {
+          "delivery_progress": 0,
+          "happiness": 84
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 24051,
+          "output_tokens": 3773,
+          "cost": 0.0233445,
+          "elapsed_s": 53.338
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 8,
+      "run_id": "no_coach_008",
+      "path": "no_coach_008",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_008",
+        "final_turn": 6,
+        "goal_met": true,
+        "aborted_stress": false,
+        "work_done": 2,
+        "final_vitals": {
+          "lia": {
+            "energy": 48,
+            "motivation": 98,
+            "stress": 65
+          },
+          "marcus": {
+            "energy": 68,
+            "motivation": 96,
+            "stress": 46
+          },
+          "dana": {
+            "energy": 73,
+            "motivation": 87,
+            "stress": 51
+          }
+        },
+        "org": {
+          "delivery_progress": 50,
+          "happiness": 93
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 29994,
+          "output_tokens": 4596,
+          "cost": 0.028785,
+          "elapsed_s": 65.307
+        }
+      }
+    },
+    {
+      "variant_name": "no_coach",
+      "run_index": 9,
+      "run_id": "no_coach_009",
+      "path": "no_coach_009",
+      "ok": true,
+      "summary": {
+        "run_id": "no_coach_009",
+        "final_turn": 5,
+        "goal_met": false,
+        "aborted_stress": true,
+        "work_done": 0,
+        "final_vitals": {
+          "lia": {
+            "energy": 47,
+            "motivation": 90,
+            "stress": 95
+          },
+          "marcus": {
+            "energy": 42,
+            "motivation": 83,
+            "stress": 60
+          },
+          "dana": {
+            "energy": 52,
+            "motivation": 80,
+            "stress": 55
+          }
+        },
+        "org": {
+          "delivery_progress": 0,
+          "happiness": 84
+        },
+        "coach_mode": "none",
+        "coach_preset_id": null,
+        "totals": {
+          "input_tokens": 24461,
+          "output_tokens": 3846,
+          "cost": 0.0237685,
+          "elapsed_s": 58.057
+        }
+      }
+    }
+  ]
+}

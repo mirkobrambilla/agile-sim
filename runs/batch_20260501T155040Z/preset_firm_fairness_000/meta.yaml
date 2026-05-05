@@ -1,0 +1,13 @@
+run_id: preset_firm_fairness_000
+harness_version: 0.0.1
+git_sha: unknown
+scenario_id: two-teams-shared-staging
+scenario_path: /Users/foz/src/agile-sim/scenarios/two-teams-shared-staging
+models:
+  agent: google/gemini-3-flash-preview
+  coach: google/gemini-3-flash-preview
+seed: 5002
+variant_name: preset_firm_fairness
+coach_mode: preset
+coach_preset_id: firm_fairness
+coach_preset_path: /Users/foz/src/agile-sim/scenarios/two-teams-shared-staging/coach_presets/firm_fairness.yaml

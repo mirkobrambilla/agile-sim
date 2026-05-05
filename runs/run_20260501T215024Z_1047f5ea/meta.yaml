@@ -1,0 +1,13 @@
+run_id: run_20260501T215024Z_1047f5ea
+harness_version: 0.0.1
+git_sha: 64d39ca726032eec440760849cd434e239b6494f
+scenario_id: two-devs-and-a-pm
+scenario_path: /Users/foz/src/agile-sim/scenarios/two-devs-and-a-pm
+models:
+  agent: stub
+  coach: stub
+seed: null
+coach_mode: llm
+coach_preset_id: null
+coach_preset_path: null
+live_session: true
