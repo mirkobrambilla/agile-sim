@@ -286,14 +286,31 @@ def cmd_experiment(
     default=None,
     help="Finished runs root (default: env AGILE_SIM_RUNS_DIR or ./runs).",
 )
-@click.option("--host", default="127.0.0.1", show_default=True)
-@click.option("--port", type=int, default=8765, show_default=True)
+@click.option(
+    "--scenarios-dir",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Scenario library root (default: env AGILE_SIM_SCENARIOS_DIR or <repo>/scenarios).",
+)
+@click.option("--host", default=None, help="Default: env AGILE_SIM_HOST or 127.0.0.1.")
+@click.option("--port", type=int, default=None, help="Default: env AGILE_SIM_PORT or 8765.")
 @click.option("--reload", is_flag=True, help="Dev autoreload.")
-def cmd_serve(runs_dir: Path | None, host: str, port: int, reload: bool) -> None:
+def cmd_serve(
+    runs_dir: Path | None,
+    scenarios_dir: Path | None,
+    host: str | None,
+    port: int | None,
+    reload: bool,
+) -> None:
     """Serve the read-only web UI over HTTP."""
 
     if runs_dir is not None:
         os.environ["AGILE_SIM_RUNS_DIR"] = str(runs_dir.expanduser().resolve())
+    if scenarios_dir is not None:
+        os.environ["AGILE_SIM_SCENARIOS_DIR"] = str(scenarios_dir.expanduser().resolve())
+
+    host = host or os.environ.get("AGILE_SIM_HOST", "127.0.0.1")
+    port = port or int(os.environ.get("AGILE_SIM_PORT", "8765"))
 
     import uvicorn
 
@@ -309,7 +326,9 @@ def cmd_serve(runs_dir: Path | None, host: str, port: int, reload: bool) -> None
         from harness.web.app import create_app
 
         rd = Path(os.environ.get("AGILE_SIM_RUNS_DIR", "runs")).resolve()
-        uvicorn.run(create_app(runs_dir=rd), host=host, port=port)
+        sd_env = os.environ.get("AGILE_SIM_SCENARIOS_DIR")
+        sd = Path(sd_env).resolve() if sd_env else None
+        uvicorn.run(create_app(runs_dir=rd, scenarios_dir=sd), host=host, port=port)
 
 
 @main.command("view")

@@ -1,0 +1,56 @@
+image:
+  repository: agile-sim
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Run state isn't safe to share across pods (see deployment template comment).
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+server:
+  host: "0.0.0.0"
+  port: 8765
+
+persistence:
+  enabled: true
+  size: 20Gi
+  accessMode: ReadWriteOnce
+  storageClassName: ""   # "" uses the cluster default
+  existingClaim: ""      # set to reuse an existing PVC instead of creating one
+
+# OpenRouter key, mounted as /app/secrets.yaml. Provide one of:
+#   secrets.openrouterApiKey: "sk-or-v1-..."   (chart creates the Secret)
+#   secrets.existingSecret: "my-secret"        (must have a `secrets.yaml` key)
+secrets:
+  openrouterApiKey: ""
+  existingSecret: ""
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+terminationGracePeriodSeconds: 30
+preStopSleepSeconds: 5
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: agile-sim.local
+  tls: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
