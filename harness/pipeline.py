@@ -80,7 +80,7 @@ def run_experiment(
     secrets: Path | None = None,
     verbose: bool = False,
     with_judge: bool | None = None,
-    judge_model: str = "google/gemini-3-flash-preview",
+    judge_model: str = "google/gemma-4-26b-a4b-it:free",
     max_judge_runs: int = 20,
     llm_summary: bool = True,
     summary_model: str | None = None,

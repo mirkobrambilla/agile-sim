@@ -743,7 +743,7 @@ def create_app(*, runs_dir: Path | None = None, scenarios_dir: Path | None = Non
     async def start_live_run(
         request: Request,
         scenario_slug: str = Form(...),
-        agent_model: str = Form("google/gemini-3-flash-preview"),
+        agent_model: str = Form("google/gemma-4-26b-a4b-it:free"),
         coach_model: str = Form(""),
         coach_mode: str = Form("llm"),
     ) -> RedirectResponse:
@@ -761,7 +761,7 @@ def create_app(*, runs_dir: Path | None = None, scenarios_dir: Path | None = Non
         sess = RunSession.start(
             scenario_dir=scen,
             runs_dir=runs_dir,
-            agent_model=agent_model.strip() or "google/gemini-3-flash-preview",
+            agent_model=agent_model.strip() or "google/gemma-4-26b-a4b-it:free",
             coach_model=cm,
             coach_mode_cli=coach_mode.strip().lower(),
             coach_preset_cli=None,
