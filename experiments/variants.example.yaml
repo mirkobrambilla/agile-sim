@@ -8,8 +8,8 @@ seed_base: 2000
 
 variants:
   - name: gpt4o_mini_baseline
-    agent_model: google/gemini-3-flash-preview
-    coach_model: google/gemini-3-flash-preview
+    agent_model: google/gemma-4-26b-a4b-it:free
+    coach_model: google/gemma-4-26b-a4b-it:free
   # - name: other_model
   #   agent_model: anthropic/claude-4.6-sonnet
   #   coach_model: anthropic/claude-4.6-sonnet

@@ -10,20 +10,20 @@ seed_base: 5000
 
 variants:
   - name: no_coach
-    agent_model: google/gemini-3-flash-preview
+    agent_model: google/gemma-4-26b-a4b-it:free
     coach_mode: none
 
   - name: preset_agile_light
-    agent_model: google/gemini-3-flash-preview
+    agent_model: google/gemma-4-26b-a4b-it:free
     coach_mode: preset
     coach_preset: ../scenarios/two-teams-shared-staging/coach_presets/agile_light.yaml
 
   - name: preset_firm_fairness
-    agent_model: google/gemini-3-flash-preview
+    agent_model: google/gemma-4-26b-a4b-it:free
     coach_mode: preset
     coach_preset: ../scenarios/two-teams-shared-staging/coach_presets/firm_fairness.yaml
 
   # Uncomment to compare LLM coach (same model as agents):
   # - name: llm_coach
-  #   agent_model: google/gemini-3-flash-preview
+  #   agent_model: google/gemma-4-26b-a4b-it:free
   #   coach_mode: llm

@@ -75,7 +75,7 @@ n = 10 per variant).
 - **Coaching best-practices merge** — global library plus scenario file: scenario entry **replaces** global when `id` matches; new `id`s **append** (`concept.md`, F-BP2).
 - **Process invocation allowlist (v1 harness)** — kinds recorded on the timeline: `consult`, `invoke`, `tick`, `request_approval`, `change_deadline`, `edit_ritual`, `set_gate`; other kinds → `process_invocation_unhandled`. Deeper kinds and execution deferred (`architecture.md`, F-PE2).
 - **Coachability (v1)** — no separate scalar trait; receptiveness is **emergent** from personality and context (`concept.md`, `agentic-design.md`).
-- **Default agent and judge model** is `google/gemini-3-flash-preview`.
+- **Default agent and judge model** is `google/gemma-4-26b-a4b-it:free`.
 - Single LLM call per agent per turn (no tool-calling loop) stays for v1.
 - `seed_base` is treated as a label, not a reproducibility guarantee.
 
