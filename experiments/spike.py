@@ -2,7 +2,7 @@
 """Phase-1 spike: one-file multi-agent + coach loop, real OpenRouter calls, JSONL outputs.
 
 Run from repo root:
-  uv run python experiments/spike.py --model google/gemma-4-26b-a4b-it:free
+  uv run python experiments/spike.py --model google/gemini-3-flash-preview
   # or: python experiments/spike.py (after pip install deps and PYTHONPATH=src)
 """
 
@@ -437,7 +437,7 @@ def run_spike(model: str, max_turns: int, out_dir: Path) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Spike: multi-agent + coach harness")
-    ap.add_argument("--model", default="google/gemma-4-26b-a4b-it:free", help="OpenRouter model id")
+    ap.add_argument("--model", default="google/gemini-3-flash-preview", help="OpenRouter model id")
     ap.add_argument("--max-turns", type=int, default=10)
     ap.add_argument("--out", type=Path, default=ROOT / "runs" / "spike")
     args = ap.parse_args()

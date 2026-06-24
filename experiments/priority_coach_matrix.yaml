@@ -11,9 +11,9 @@ seed_base: 7100
 
 variants:
   - name: no_coach
-    agent_model: google/gemma-4-26b-a4b-it:free
+    agent_model: google/gemini-3-flash-preview
     coach_mode: none
 
   - name: llm_coach
-    agent_model: google/gemma-4-26b-a4b-it:free
+    agent_model: google/gemini-3-flash-preview
     coach_mode: llm
