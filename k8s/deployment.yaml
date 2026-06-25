@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agile-sim
+  namespace: agile-sim
+  labels:
+    app: agile-sim
+spec:
+  # Single replica: run state (runs/, scenarios/) lives on one ReadWriteOnce
+  # volume and an in-process RunSession isn't safe to share across pods.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: agile-sim
+  template:
+    metadata:
+      labels:
+        app: agile-sim
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: agile-sim
+          image: agile-sim:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8765
+          env:
+            - name: AGILE_SIM_HOST
+              value: "0.0.0.0"
+            - name: AGILE_SIM_PORT
+              value: "8765"
+            - name: AGILE_SIM_RUNS_DIR
+              value: /data/runs
+            - name: AGILE_SIM_SCENARIOS_DIR
+              value: /data/scenarios
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: secrets
+              mountPath: /app/secrets.yaml
+              subPath: secrets.yaml
+              readOnly: true
+          # Let uvicorn drain in-flight requests before the process exits;
+          # preStop gives the endpoint controller time to remove the pod
+          # from Service routing first.
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 5"]
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: agile-sim-data
+        - name: secrets
+          secret:
+            secretName: agile-sim-secrets

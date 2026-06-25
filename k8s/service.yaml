@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agile-sim
+  namespace: agile-sim
+  labels:
+    app: agile-sim
+spec:
+  type: ClusterIP
+  selector:
+    app: agile-sim
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

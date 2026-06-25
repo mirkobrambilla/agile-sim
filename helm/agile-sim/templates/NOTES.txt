@@ -1,0 +1,20 @@
+agile-sim deployed as {{ include "agile-sim.fullname" . }} in {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+URL: http://{{ .Values.ingress.host }}
+{{- else if eq .Values.service.type "ClusterIP" }}
+Port-forward to reach it:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "agile-sim.fullname" . }} 8765:{{ .Values.service.port }}
+  open http://127.0.0.1:8765
+{{- else }}
+Get the service address:
+  kubectl -n {{ .Release.Namespace }} get svc {{ include "agile-sim.fullname" . }}
+{{- end }}
+
+{{- if not .Values.secrets.openrouterApiKey }}
+{{- if not .Values.secrets.existingSecret }}
+
+WARNING: no OpenRouter API key set (secrets.openrouterApiKey / secrets.existingSecret).
+Live runs from the UI will fail until one is configured.
+{{- end }}
+{{- end }}
