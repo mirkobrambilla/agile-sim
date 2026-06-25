@@ -63,7 +63,8 @@ class OpenRouterClient:
     ) -> tuple[str, dict]:
         """Send a chat completion and return (text, usage_dict).
 
-        usage_dict has keys: input_tokens, output_tokens, cost (all ints/floats, default 0).
+        usage_dict has keys: input_tokens, output_tokens, cost (all ints/floats,
+        default 0) and served_model (the concrete model that served the request).
         """
         data = self.chat(model, messages, temperature, max_tokens)
         content = data["choices"][0]["message"]["content"] or ""
@@ -72,6 +73,10 @@ class OpenRouterClient:
             "input_tokens": raw_usage.get("prompt_tokens", 0),
             "output_tokens": raw_usage.get("completion_tokens", 0),
             "cost": float(data.get("usage", {}).get("cost", 0) or 0),
+            # With `openrouter/auto` the router picks a concrete model and reports
+            # it back in the top-level `model` field; for a pinned request it
+            # echoes the requested id. Fall back to the requested model if absent.
+            "served_model": str(data.get("model") or model),
         }
         return content, usage
 
