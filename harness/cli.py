@@ -26,7 +26,7 @@ def main() -> None:
 @main.command("run")
 @click.argument("scenario_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--out", type=click.Path(path_type=Path), default=Path("runs"))
-@click.option("--model", "agent_model", default="google/gemma-4-26b-a4b-it:free", show_default=True)
+@click.option("--model", "agent_model", default="google/gemini-3-flash-preview", show_default=True)
 @click.option("--coach-model", default=None, help="Defaults to --model")
 @click.option(
     "--coach-mode",
@@ -84,7 +84,7 @@ def cmd_run(
 @click.argument("scenario_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--out", type=click.Path(path_type=Path), default=Path("runs"))
 @click.option("--runs", type=int, required=True)
-@click.option("--model", "agent_model", default="google/gemma-4-26b-a4b-it:free", show_default=True)
+@click.option("--model", "agent_model", default="google/gemini-3-flash-preview", show_default=True)
 @click.option("--coach-model", default=None)
 @click.option("--concurrency", type=int, default=3, show_default=True)
 @click.option("--seed-base", type=int, default=None)
@@ -174,7 +174,7 @@ def cmd_matrix(
     console.print("[dim]Then:[/dim] [cyan]agile-harness experiment <matrix.yaml>[/cyan]")
 
 
-EXPERIMENT_JUDGE_DEFAULT_MODEL = "google/gemma-4-26b-a4b-it:free"
+EXPERIMENT_JUDGE_DEFAULT_MODEL = "google/gemini-3-flash-preview"
 
 
 @main.command("experiment")
@@ -410,7 +410,7 @@ def cmd_analyse(batch_dir: Path, judge_report: Path | None) -> None:
 
 @main.command("judge")
 @click.argument("batch_dir", type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--model", "judge_model", default="google/gemma-4-26b-a4b-it:free", show_default=True)
+@click.option("--model", "judge_model", default="google/gemini-3-flash-preview", show_default=True)
 @click.option("--secrets", type=click.Path(path_type=Path), default=None)
 @click.option("--max-runs", type=int, default=20, show_default=True)
 def cmd_judge(batch_dir: Path, judge_model: str, secrets: Path | None, max_runs: int) -> None:
